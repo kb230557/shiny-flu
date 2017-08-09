@@ -1,0 +1,63 @@
+
+/*
+==================================
+Primary Header
+=================================
+*/
+
+.header {
+  height: 120px;
+  background: #fff;
+  border-bottom: 6px solid #6E9DC9;
+  /*Blue to Dark Gray, down
+  background: -webkit-linear-gradient(#6E9DC9, #2E465E);
+  background: -moz-linear-gradient(#6E9DC9, #2E465E);
+  background: linear-gradient(#6E9DC9, #2E465E);*/
+
+/*White to Blue, to right
+  background: -webkit-linear-gradient(to right, #fff, #6E9DC9);
+  background: -moz-linear-gradient(to right, #fff, #6E9DC9);
+  background: linear-gradient(to right, #fff, #6E9DC9);*/
+
+}
+
+.headimg {
+  height:120px;
+}
+
+.headtitle {
+    position: relative;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%);
+    color: #000000;/*#2E465E*/;
+    /*font-weight: 900;*/
+    font-size: 80px;
+    letter-spacing: .07em;
+}
+
+img {
+  max-height: 100%;
+  max-width: 100%;
+  position: relative;
+  top: 50%;
+  -webkit-transform: translateY(-50%);
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+}
+
+#beta {
+  /*color:#ff0000;*/
+  color: #F33535;
+}
+
+/*
+==================================
+General Styles
+=================================
+*/
+
+p {
+  letter-spacing: .05em;
+}
