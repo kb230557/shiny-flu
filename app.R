@@ -3,10 +3,13 @@
 # a windows task scheduler to run it every morning at 4 or 5 AM
 
 
+#Un-comment if sending to others (make ssure all necessary packages are installed)
+# unavailable <- setdiff(c("shiny","readxl","dplyr","tidyr","stringr","ggplot2","Cairo"), rownames(installed.packages()))
+# install.packages(unavailable)
 
 #Setting working directory, loading packages, and importing data
 setwd("H:/Flu/Application")
-lapply(list("shiny","readxl","dplyr","tidyr","stringr","ggplot2","Cairo","plotly"), require, character.only = TRUE)
+lapply(list("shiny","readxl","dplyr","tidyr","stringr","ggplot2","Cairo"), require, character.only = TRUE)
 flued <- read_excel('S:/Enhanced Surveillance/Flu Surveillance/2017_18/CCDPH_ILI_17-18Season.xlsx', skip=1)
 
 #Removing empty rows and unnecessary columns from Excel
@@ -40,7 +43,8 @@ flued$Season <- paste("20",flued$Season, sep="")
 #Converting MMWR Week to factor and setting levels so x axis begins at the start of the flu season
 flued$CDC_Week <- factor(flued$CDC_Week, levels = c(35:52, 1:34), ordered = TRUE)
 #Selecting data to be displayed on the ED by Season graph
-fluedyr <- filter(flued, !Season %in% c("2006-07","2007-08","2008-09","2009-10") & Region == "Sub-Cook")
+fluedyr <- filter(flued, !Season %in% c("2006-07","2007-08","2008-09","2009-10") & Region == "Sub-Cook" & !CDC_Week %in% c(21:34) )
+
 
 #Start of the code to build the user interface
 ui <- fluidPage(
@@ -76,11 +80,11 @@ ui <- fluidPage(
           
           checkboxGroupInput(inputId = "seasonpick", #inputID used in server function to ensure user-selected data is displayed
                          label = "Display ED Data by Season for Suburban Cook County", 
-                         #choices = c("2010-11", "2011-12","2012-13","2013-14","2014-15","2015-16","2016-17","2017-18") - Alternative code to use if choiceNames and choiceValues don't work (must match the way data appears in the df)
                          choiceNames = list("2010-11 (Mixed Strain Predominant)", "2011-12 (H3N2 Predominant)","2012-13 (H3N2 Predominant)",
                                             "2013-14 (H1N1 Predominant)","2014-15 (H3N2 Predominant)","2015-16 (H1N1 Predominant)",
                                             "2016-17 (H3N2 Predominant)","2017-18"), 
-                         choiceValues = list("2010-11", "2011-12","2012-13","2013-14","2014-15","2015-16","2016-17","2017-18")),
+                         choiceValues = list("2010-11", "2011-12","2012-13","2013-14","2014-15","2015-16","2016-17","2017-18"),
+                         selected = "2017-18"),
           
           p("Include the 2017-2018 Baseline?*", style = "font-weight: bold"),
           
@@ -94,10 +98,15 @@ ui <- fluidPage(
       
         #Creates the reference to the plot in the server function
         mainPanel(
-        plotOutput("seasonplot")
+          div(  #Mirroring code from hover code credit in server function
+            style = "position:relative", #Mirroring code from code credit
+            
+            plotOutput("seasonplot", hover = hoverOpts("plot_hover", delay = 100, delayType = "debounce")), #Stores mouse data when user hovers over point
+            uiOutput("hover_info"), #Displays values from server function to select data for hovered-over plot
+            downloadButton('downloadseason', 'Download Image')
+          )
         )
       ))
-
 
 
 #Start of code to build the graphs
@@ -111,6 +120,14 @@ server <- function(input, output) {
     return(fluedyr[fluedyr$Season %in% input$seasonpick, ]) #inputID is from user interface - ensures user-selected data is displayed
   })
   
+  #Attempted to merge season data with baseline data so hover option would work on baseline data but code didn't work, retained for possible further troubleshooting
+  # hoverdata = reactive({
+  #   if(input$baselinecheck) {
+  #     rbind(userdata(),testdf)
+  #   }
+  #   else return(userdata())
+  # })
+  
   #Selecting colors and line types to represent each season -- #### NOTE - Might want to play around more with these
   groupcolors <- c("2010-11" = "#2F6396", "2011-12" = "#B3AFED", "2012-13" = "#6E9DC9", "2013-14" = "#484199", 
                    "2014-15" = "#9BBFE2", "2015-16" = "#52779A", "2016-17" = "#7F79D0", "2017-18" = "#F33535")
@@ -118,11 +135,11 @@ server <- function(input, output) {
   grouplines <- c("2010-11" = 5, "2011-12" = 1, "2012-13" = 4, "2013-14" = 3, 
                   "2014-15" = 1, "2015-16" = 5, "2016-17" = 4, "2017-18" = 1)
   
-  #Creating plot of data from function above
-  output$seasonplot <- renderPlot({
+  
+  #Creating plot of user-selected data to use in the download image function 
+  edyrplot <- reactive({
     
-
-      ggplot(data = userdata(), aes(x = CDC_Week, y = ED_ILI, color = Season)) +
+    ggplot(data = userdata(), aes(x = CDC_Week, y = ED_ILI, color = Season)) +
       geom_point(size = 3) + #######Consider size=4 paired with line size = 2 
       geom_line(aes(group = Season, linetype = Season), size = 1) +
       geom_hline(yintercept = ifelse(input$baselinecheck, 1.02, -.1), color = "black", linetype = "F1") +
@@ -131,26 +148,92 @@ server <- function(input, output) {
       scale_linetype_manual(values = grouplines) +
       scale_y_continuous(limits = c(0,6), expand = c(0,0)) +
       theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), legend.title = element_text(size = 14, face = "bold"), 
-            legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"))
-  
+            legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 10))
     
-
   })
   
+  #Creating plot of user-selected data to display on the app (see note below)
+  output$seasonplot <- renderPlot({
+    
+    ########### NOTE - Two lines below is more efficient and legible than repreating same ggplot function from above however, I can't get 
+    #hover functionality to work unless renderPlot contains a gglot2 function (and I can't find any solutions that use the downloadHandler
+    #without placing the plot in a reactive function)
+    # p <- edyrplot()
+    # print(p)
+    
+    ggplot(data = userdata(), aes(x = CDC_Week, y = ED_ILI, color = Season)) +
+      geom_point(size = 3) + #######Consider size=4 paired with line size = 2 
+      geom_line(aes(group = Season, linetype = Season), size = 1) +
+      geom_hline(yintercept = ifelse(input$baselinecheck, 1.02, -.1), color = "black", linetype = "F1") +
+      labs(title = "Proportion of ED Visits for ILI, Suburban Cook County", x = "MMWR Week", y = "% of Visits for ILI") +
+      scale_color_manual(values = groupcolors) +
+      scale_linetype_manual(values = grouplines) +
+      scale_y_continuous(limits = c(0,6), expand = c(0,0)) +
+      theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), legend.title = element_text(size = 14, face = "bold"), 
+            legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 10))
+    
+  })
+  
+  #Creating download image functionality
+  output$downloadseason <- downloadHandler(
+    filename = "ED_Data_by_Season.png",
+    content = function(edyrfile){
+      ggsave(edyrfile, plot = edyrplot(), device = "png", height = 3, width = 10, unit = "in")
+    }
+  )
+     
+ 
+  #Generating tooltip data for hovered-over points #######CODE CREDIT: http://www.77dev.com/2016/03/custom-interactive-csshtml-tooltips.html
+  output$hover_info <- renderUI({
+    
+    if(!is.null(input$seasonpick)) { #Line added to avoid error caused by geom_hline in plot when no values are selected
+    
+      hover <- input$plot_hover
+      point <- nearPoints(userdata(), hover, threshold = 5, maxpoints = 1, addDist = TRUE)
+      if (nrow(point) == 0) return(NULL)
 
+      # calculate point position INSIDE the image as percent of total dimensions
+      # from left (horizontal) and from top (vertical)
+      left_pct <- (hover$x - hover$domain$left) / (hover$domain$right - hover$domain$left)
+      top_pct <- (hover$domain$top - hover$y) / (hover$domain$top - hover$domain$bottom)
+
+      # calculate distance from left and bottom side of the picture in pixels
+      left_px <- hover$range$left + left_pct * (hover$range$right - hover$range$left)
+      top_px <- hover$range$top + top_pct * (hover$range$bottom - hover$range$top)
+
+      # create style property fot tooltip
+      # background color is set so tooltip is a bit transparent
+      # z-index is set so we are sure are tooltip will be on top
+      style <- paste0("position:absolute; z-index:100; background-color: rgba(245, 245, 245, 0.85); ",
+                    "left:", left_px + 2, "px; top:", top_px + 2, "px;")
+
+      # actual tooltip created as wellPanel
+      wellPanel(
+        style = style,
+        p(HTML(paste0("<b> Season: </b>", point$Season, "<br/>",
+                      "<b> MMWR Week: </b>", point$CDC_Week, "<br/>",
+                      "<b> % of ED Visits for ILI: </b>", point$ED_ILI, "<br/>")))
+      )
+    
+    }
+  })
+
+  
 }
 
 shinyApp(ui,server)
 
 
 
-############################ TO DO: 
+############################ Remaining Issues: 
 
-#X axis doesn't appear when only baseline us checked - add in permanent axis display?
-#Add mouse over labels to plot
-#Add download button
-#Can improvements be made to coding the hline input?  Or x-axis displayed with turning into a factor?
-#Add double axis with months
+
+#Hover over function to display values doesn't work with baseline (coded as geom_hline) - other solution?
+#Possible coding inefficiencies: 1) duplicate ggplot calls for downloading and display+hover
+#                                2) if else statement for creating baseline hline (draws non-visble line if not checked) 
+#                                3) x-axis ordered by turning numeric week into factor with levels 
+#See if double axis can be added with months 
+#x-axis disappears when no seasons are checked
 
 
 
@@ -171,6 +254,13 @@ shinyApp(ui,server)
 # https://shiny.rstudio.com/reference/shiny/latest/
 # https://www.rstudio.com/products/shiny/shiny-user-showcase/
 # https://shiny.rstudio.com/articles/
+
+
+###Download Button
+# https://groups.google.com/forum/#!topic/shiny-discuss/k5RGIEpK9EI
+# https://stackoverflow.com/questions/14810409/save-plots-made-in-a-shiny-app
+# https://gist.github.com/TrigonaMinima/bd0fb5a568b8227487ee
+
 
 ###Adding Tooltips 
 #http://www.77dev.com/2016/03/custom-interactive-csshtml-tooltips.html
