@@ -49,7 +49,8 @@ server <- function(input, output) {
       scale_linetype_manual(values = grouplinesyr) +
       scale_y_continuous(limits = c(0,6), expand = c(0,0)) +
       theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), legend.title = element_text(size = 14, face = "bold"), 
-            legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 10))
+            legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 10),
+            panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line())
     
   })
   
@@ -71,7 +72,8 @@ server <- function(input, output) {
       scale_linetype_manual(values = grouplinesyr) +
       scale_y_continuous(limits = c(0,6), expand = c(0,0)) +
       theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), legend.title = element_text(size = 14, face = "bold"), 
-            legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 10))
+            legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 10),
+            panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line())
     
   })
   
@@ -140,7 +142,8 @@ server <- function(input, output) {
       scale_y_continuous(limits = c(0,8), expand = c(0,0)) +
       theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), legend.title = element_text(size = 14, face = "bold"), 
             legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 10),
-            panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line())
+            panel.grid.major = element_line(color = "#E5E5E5"), panel.grid.minor = element_line(color = "#E5E5E5"),
+            panel.background = element_rect(fill = NA), axis.line = element_line())
     
   })
   
@@ -190,4 +193,10 @@ server <- function(input, output) {
   })
    
   
+  #==========================================LAB DATA (SERVER)=============================================================#
+  
+  
+  
 }
+
+

@@ -52,6 +52,25 @@ img {
   color: #F33535;
 }
 
+
+/*
+==================================
+Home Tab
+=================================
+*/
+.homeimg {
+  height: 300px;
+}
+
+#risk {
+   padding-bottom: 10px;
+   padding-top: 10px;
+   text-align: center;
+   background: #ecf2f8;
+   border: 2px solid #6E9DC9;
+   border-radius: 10px;
+}
+
 /*
 ==================================
 General Styles
