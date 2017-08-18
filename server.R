@@ -67,7 +67,7 @@ server <- function(input, output) {
       geom_point(size = 3) + #######Consider size=4 paired with line size = 2 
       geom_line(aes(group = Season, linetype = Season), size = 1) +
       geom_hline(yintercept = ifelse(input$baselinecheck, 1.02, -.1), color = "black", linetype = "F1") +
-      labs(title = "Proportion of ED Visits for ILI, Suburban Cook County", x = "MMWR Week", y = "% of Visits for ILI") +
+      labs(title = "Proportion of ED Visits for ILI, Suburban Cook County\n", x = "MMWR Week", y = "% of Visits for ILI") +
       scale_color_manual(values = groupcolorsyr) +
       scale_linetype_manual(values = grouplinesyr) +
       scale_y_continuous(limits = c(0,6), expand = c(0,0)) +
@@ -136,14 +136,16 @@ server <- function(input, output) {
     ggplot(data = userdataage(), aes(x = Week_Number, y = ED_ILI, color = Age_Group)) +
       geom_point(size = 3) + #######Consider size=4 paired with line size = 2 
       geom_line(aes(group = Age_Group, linetype = Age_Group), size = 1) +
-      labs(title = "Proportion of ED Visits for ILI by Age Group, Suburban Cook County", x = "MMWR Week", y = "% of Visits for ILI") +
+      labs(title = "Proportion of ED Visits for ILI by Age Group, Suburban Cook County\n", x = "MMWR Week", y = "% of Visits for ILI") +
       scale_color_manual(values = groupcolorsage, name = "Age Group") +
       scale_linetype_manual(values = grouplinesage, name = "Age Group") +
       scale_y_continuous(limits = c(0,8), expand = c(0,0)) +
       theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), legend.title = element_text(size = 14, face = "bold"), 
             legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 10),
-            panel.grid.major = element_line(color = "#E5E5E5"), panel.grid.minor = element_line(color = "#E5E5E5"),
-            panel.background = element_rect(fill = NA), axis.line = element_line())
+            panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line())
+            #Grey gridlines option:
+            #panel.grid.major = element_line(color = "#E5E5E5"), panel.grid.minor = element_line(color = "#E5E5E5"),
+            #panel.background = element_rect(fill = NA), axis.line = element_line())
     
   })
   
@@ -195,8 +197,111 @@ server <- function(input, output) {
   
   #==========================================LAB DATA (SERVER)=============================================================#
   
+
+  groupcolorslab <- c("A (H1N1)" = "#b5cde3", "A (H3N2)" = "#376895", "A (Unknown Subtype)" = "#6E9DC9", "B" = "#C96E85")
+  
+  userdatalabbar = reactive({
+      return(labcount[labcount$Subtype %in% input$labbarstrain, ]) 
+  })
+  
+  output$labbarplot <- renderPlot({
+    
+    ggplot(userdatalabbar(), aes(x = Week, y = Count, fill = Subtype)) +
+      geom_col(position = input$labbartype) +
+      labs(title = "Number of Laboratory Specimens Positive for Influenza by Strain\n", x = "MMWR Week", y = "Count") +
+      scale_fill_manual(values = groupcolorslab, name = "Strain") +
+      scale_y_continuous(expand = c(0,0)) +
+      theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), legend.title = element_text(size = 14, face = "bold"), 
+            legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 10),
+            panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line())
+    
+    
+  })
+  
+  labbplot <- reactive({
+    
+    ggplot(userdatalabbar(), aes(x = Week, y = Count, fill = Subtype)) +
+      geom_col(position = input$labbartype) +
+      labs(title = "Number of Laboratory Specimens Positive for Influenza by Strain", x = "MMWR Week", y = "Count") +
+      scale_fill_manual(values = groupcolorslab, name = "Strain") +
+      scale_y_continuous(expand = c(0,0)) +
+      theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), legend.title = element_text(size = 14, face = "bold"), 
+            legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 10),
+            panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line())
+    
+    
+  })
+  
+  output$downloadlabbar <- downloadHandler(
+    filename = "Lab_Data_by_Strain.png",
+    content = function(labbarfile){
+      ggsave(labbarfile, plot = labbplot(), device = "png", height = 3, width = 10, unit = "in")
+    }
+  )
+  
+  groupcolorsperpos <- c("2016-17" = "#C96E85","2015-16" = "#6E9DC9")
+
+  userdatalabline = reactive({
+    return(unique(labcount[labcount$Season %in% input$labpick,1:3])) 
+  })
+  
+  output$lablineplot <- renderPlot({
+    
+    ggplot(data = userdatalabline(), aes(x = Week, y = Percent_Pos, color = Season)) +
+      geom_point(size = 3) + #######Consider size=4 paired with line size = 2 
+      geom_line(aes(group = Season), size = 1) +
+      labs(title = "Percent of Lab Specimens Positive for Influenza\n", x = "MMWR Week", y = "% of Positive Specimens") +
+      scale_color_manual(values = groupcolorsperpos, name = "Season") +
+      scale_y_continuous(limits = c(0,35), expand = c(0,0)) +
+      theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), legend.title = element_text(size = 14, face = "bold"), 
+            legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 10),
+            panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line())
+  })
+
+  output$hover_info_labline <- renderUI({
+    
+    hover <- input$plot_hover_labline
+    point <- nearPoints(userdatalabline(), hover, threshold = 5, maxpoints = 1, addDist = TRUE)
+    if (nrow(point) == 0) return(NULL)
+    
+    left_pct <- (hover$x - hover$domain$left) / (hover$domain$right - hover$domain$left)
+    top_pct <- (hover$domain$top - hover$y) / (hover$domain$top - hover$domain$bottom)
+    
+    left_px <- hover$range$left + left_pct * (hover$range$right - hover$range$left)
+    top_px <- hover$range$top + top_pct * (hover$range$bottom - hover$range$top)
+    
+    style <- paste0("position:absolute; z-index:100; background-color: rgba(245, 245, 245, 0.85); ",
+                    "left:", left_px + 2, "px; top:", top_px + 2, "px;")
+    wellPanel(
+      style = style,
+      p(HTML(paste0("<b> Season: </b>", point$Season, "<br/>",
+                    "<b> MMWR Week: </b>", point$Week, "<br/>",
+                    "<b> % Positive: </b>", round(point$Percent_Pos, 2), "<br/>")))
+    )
+  })
+  
+  lablplot <- reactive({
+    
+    ggplot(data = userdatalabline(), aes(x = Week, y = Percent_Pos, color = Season)) +
+      geom_point(size = 3) + #######Consider size=4 paired with line size = 2 
+      geom_line(aes(group = Season), size = 1) +
+      labs(title = "Percent of Lab Specimens Positive for Influenza\n", x = "MMWR Week", y = "% of Positive Specimens") +
+      scale_color_manual(values = groupcolorsperpos, name = "Season") +
+      scale_y_continuous(limits = c(0,35), expand = c(0,0)) +
+      theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), legend.title = element_text(size = 14, face = "bold"), 
+            legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 10),
+            panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line())
+    
+  })
   
   
-}
+  output$downloadlabline <- downloadHandler(
+    filename = "Lab_Data_by_Season.png",
+    content = function(lablinefile){
+      ggsave(lablinefile, plot = lablplot(), device = "png", height = 3, width = 10, unit = "in")
+    }
+  )
+  
+}#Server function closure
 
 

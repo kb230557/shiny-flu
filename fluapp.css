@@ -18,7 +18,6 @@ Primary Header
   background: -webkit-linear-gradient(to right, #fff, #6E9DC9);
   background: -moz-linear-gradient(to right, #fff, #6E9DC9);
   background: linear-gradient(to right, #fff, #6E9DC9);*/
-
 }
 
 .headimg {
@@ -31,24 +30,12 @@ Primary Header
     -webkit-transform: translateY(-50%);
     -ms-transform: translateY(-50%);
     transform: translateY(-50%);
-    color: #000000;/*#2E465E*/;
-    /*font-weight: 900;*/
+    color: #000000;
     font-size: 80px;
     letter-spacing: .07em;
 }
 
-img {
-  max-height: 100%;
-  max-width: 100%;
-  position: relative;
-  top: 50%;
-  -webkit-transform: translateY(-50%);
-  -ms-transform: translateY(-50%);
-  transform: translateY(-50%);
-}
-
 #beta {
-  /*color:#ff0000;*/
   color: #F33535;
 }
 
@@ -58,8 +45,8 @@ img {
 Home Tab
 =================================
 */
-.homeimg {
-  height: 300px;
+.homestrip {
+  height: 200px;
 }
 
 #risk {
@@ -67,8 +54,18 @@ Home Tab
    padding-top: 10px;
    text-align: center;
    background: #ecf2f8;
-   border: 2px solid #6E9DC9;
+   border: 3px solid #6E9DC9;
    border-radius: 10px;
+   font-size: 15px;
+}
+
+#info {
+   padding-bottom: 10px;
+   padding-top: 10px;
+   text-align: center;
+   background:  #f3f1f3;
+   border: 3px solid #dbd6db;
+   font-size: 12px;
 }
 
 /*
@@ -79,4 +76,16 @@ General Styles
 
 p {
   letter-spacing: .05em;
+}
+
+img {
+  max-height: 100%;
+  max-width: 100%;
+  position: relative;
+  top: 50%;
+  -webkit-transform: translateY(-50%);
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+  display:block;
+  margin:auto;
 }
