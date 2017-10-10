@@ -78,7 +78,8 @@ p {
   letter-spacing: .05em;
 }
 
-img {
+
+.imggen {
   max-height: 100%;
   max-width: 100%;
   position: relative;

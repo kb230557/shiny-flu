@@ -4,6 +4,8 @@ library("shiny")
 library("dplyr")
 library("ggplot2")
 library("Cairo")
+library("sp")
+library("leaflet")
 load("flu.Rdata")
 
 server <- function(input, output) {
@@ -194,14 +196,85 @@ server <- function(input, output) {
       )
   })
    
+  #==========================================ED MAP DATA (SERVER)=============================================================#
   
+  #Filtering data to select only spatial data and selected week for ED values
+  mapdata <- reactive ({
+    temp <- zips[,c(1:10,(input$mapweek-24))]   #Filtering data to select only spatial data and selected week for ED values
+    names(temp) <- gsub("_.*","",names(temp))   #Renaming selected week to non-specific "Week" for use in later functions
+    return(temp)
+  })
+  
+  #Creating color palette for map based on selected week
+  palbin <- reactive ({
+    bins <- c(0,1,2,4,6,8,10,Inf)
+    colorBin("Blues", mapdata()$Week, bins = bins, na.color=NA)
+  })
+  
+  #Creating labels for map based on selected week
+  labels <- reactive ({
+    sprintf("<strong>%s</strong><br/>%g %%", zips$ZCTA5CE10, mapdata()$Week) %>% lapply(htmltools::HTML)
+  })
+  
+  #Generating the base map so it doesn't need to be redrawn with each change
+  output$EDmap <- renderLeaflet({
+    
+    leaflet(zips) %>% addProviderTiles(providers$CartoDB.Positron) %>% setView(lng = -87.86, lat = 41.8, zoom = 10)
+    
+  })
+  
+  #Creating the rest of the map in observer functions so it will be re-drawn as options change
+  observe ({
+    
+    pal <- palbin()
+    
+    labs <- labels()
+    
+    leafletProxy("EDmap", data = mapdata()) %>% clearShapes() %>% clearControls() %>% #clearing data from previous draw of map then adding new data
+      addPolygons(
+        fillColor = ~pal(mapdata()$Week),
+        weight = 2,
+        opacity = 1,
+        color = "white",
+        dashArray = "3",
+        fillOpacity = 0.7,
+        highlight = highlightOptions(weight = 4, color = "white", dashArray = "1", fillOpacity = 0.7, bringToFront = TRUE),
+        label = labs,
+        labelOptions = labelOptions(
+          style = list("font-weight" = "normal", padding = "3px 8px"),
+          textsize = "15px", direction = "auto")) %>%
+      addLegend("topright", pal = pal, values = ~mapdata()$Week,
+                title = "% of ED Visits for ILI",
+                labFormat = labelFormat(suffix = " %"),
+                opacity = 1)
+    
+  })
+   
+  observe ({
+    
+    #Creating hospital icon
+    hospam <- makeAwesomeIcon(icon = "plus", library = "glyphicon", markerColor = "red", iconColor = "white")
+    
+    #Creating hospital layer 
+    proxy <- leafletProxy("EDmap") %>% addAwesomeMarkers(data = hospitals, icon = hospam, group = "hosps", #assign a layer to a group
+                                      label = ~as.character(CFNAME), labelOptions = labelOptions(
+                                      style = list("font-weight" = "normal", padding = "3px 8px"),
+                                      textsize = "14px", direction = "auto"))   
+    
+    #Turn layer on and off based on whether hospital box on UI is checked
+    if (input$hosploc)  {
+      proxy %>% showGroup("hosps")
+    }
+    else (proxy %>% hideGroup("hosps"))
+    
+  })
   #==========================================LAB DATA (SERVER)=============================================================#
   
 
   groupcolorslab <- c("A (H1N1)" = "#b5cde3", "A (H3N2)" = "#376895", "A (Unknown Subtype)" = "#6E9DC9", "B" = "#C96E85")
   
   userdatalabbar = reactive({
-      return(labcount[labcount$Subtype %in% input$labbarstrain, ]) 
+      return(labcount[(labcount$Subtype %in% input$labbarstrain) & (labcount$Season == "2017-18"), ]) 
   })
   
   output$labbarplot <- renderPlot({
@@ -239,7 +312,7 @@ server <- function(input, output) {
     }
   )
   
-  groupcolorsperpos <- c("2016-17" = "#C96E85","2015-16" = "#6E9DC9")
+  groupcolorsperpos <- c("2017-18" = "#C96E85", "2016-17" = "#6E9DC9","2015-16" = "#979CA1")
 
   userdatalabline = reactive({
     return(unique(labcount[labcount$Season %in% input$labpick,1:3])) 

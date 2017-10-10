@@ -3,6 +3,8 @@ library("shiny")
 library("dplyr")
 library("ggplot2")
 library("Cairo")
+library("sp")
+library("leaflet")
 
 
 ui <- fluidPage(
@@ -14,7 +16,7 @@ ui <- fluidPage(
   
   #Building the header 
   fluidRow(class = "header",
-           column(class = "headimg", 2, align = "center", img(src="http://cookcountypublichealth.org/files/images/CCDPH_logo-full.jpg", alt="CCDPH Logo")),
+           column(class = "headimg", 2, align = "center", img(class = "imggen", src="http://cookcountypublichealth.org/files/images/CCDPH_logo-full.jpg", alt="CCDPH Logo")), 
            column(class = "headtitle", 10, HTML('
                                                 <h1 style="font-weight: 700; font-size: 40px">Weekly Influenza Surveillance Data <span id="beta">Beta</span></h1>
                                                 '))
@@ -26,13 +28,13 @@ ui <- fluidPage(
              fluidRow(
                column(2, style = "padding-right: 50px;",
                       fluidRow(
-                        column(12, class = "homestrip", img(src="https://phil.cdc.gov/PHIL_Images/11213/11213_lores.jpg", class = "img-responsive"))
+                        column(12, class = "homestrip", img(src="https://phil.cdc.gov/PHIL_Images/11213/11213_lores.jpg", class = "img-responsive imggen"))
                       ),
                       fluidRow(
-                        column(12, class = "homestrip", img(src="https://phil.cdc.gov/PHIL_Images/11213/11213_lores.jpg", class = "img-responsive"))
+                        column(12, class = "homestrip", img(src="https://phil.cdc.gov/PHIL_Images/11213/11213_lores.jpg", class = "img-responsive imggen"))
                       ),
                       fluidRow(
-                        column(12, class = "homestrip", img(src="https://phil.cdc.gov/PHIL_Images/11213/11213_lores.jpg", class = "img-responsive"))
+                        column(12, class = "homestrip", img(src="https://phil.cdc.gov/PHIL_Images/11213/11213_lores.jpg", class = "img-responsive imggen"))
                       )
                ),
                #Building home page text
@@ -42,15 +44,15 @@ ui <- fluidPage(
                      p("The Cook County Department of Health collects and analyzes data on local influenza activity year-round. During periods when higher
                         influenza activity is expected (from MMWR Week 40 through MMWR Week 20), this information is compiled into a weekly surveillance
                         report that is distributed to our partners in the healthcare community, schools, community groups, and the public. This application
-                        is a companion to our weekly surveillance report. Hard copies of the reports can be found", 
-                        a(href = "http://cookcountypublichealth.org/data-reports/communicable-diseases", "here."), 
+                        is a companion to our weekly surveillance report. Hard copies of the reports can be found",
+                        a(href = "http://cookcountypublichealth.org/data-reports/communicable-diseases", "here."),
                         align = "justify", style = "padding-bottom: 10px"),
                      p("Influenza surveillance data is collected from multiple sources including emergency department (ED) visits, visits to outpatient
                         sentinel healthcare providers, laboratory tests, intensive-care unit (ICU) hospitalizations, and deaths. The goal of influenza
                         surveillance is to determine when and where influenza activity is occuring, what influenza viruses are circulating, and the amount of
                         severe outcomes, such as hospitalizations and deaths, that can be attributed to influenza.", align = "justify",
                         style = "padding-bottom: 10px"),
-                     p(id = "info", "For more information on influenza, please visit the Centers for Disease Control and Prevention website at ", 
+                     p(id = "info", "For more information on influenza, please visit the Centers for Disease Control and Prevention website at ",
                        a(href = "https://www.cdc.gov/flu/", "https://www.cdc.gov/flu/. "), "Information and recommendations for healthcare professionals
                        can be found ", a(href = "https://www.cdc.gov/flu/professionals/index.htm", "here.")),
                      tags$small("The Cook County Department of Public Health would like to thank all of our surveillance partners for their help in collecting
@@ -63,8 +65,8 @@ ui <- fluidPage(
 #==========================================ED DATA BY SEASON (UI)=============================================================#          
   
   #Building the intro title and data source description
-      fluidRow(class = "EDhero",
-           column(class = "EDheader", 4, h3(strong("Emergency Department Visits"), style = "padding-bottom: 10px; padding-top: 5px"), 
+      fluidRow(
+           column(4, h3(strong("Emergency Department Visits"), style = "padding-bottom: 10px; padding-top: 5px"), 
                   p("Emergency department data are extracted from the CCDPH syndromic surveillance system, ESSENCE. Forty-five hospital
                     emergency departments participate in ESSENCE, including all hospitals located in Suburban Cook County. The graphs 
                     display the proportion of emergency room visits that were for influenza-like illness(ILI) among Suburban Cook County residents. 
@@ -84,7 +86,7 @@ ui <- fluidPage(
                                             "2013-14 (H1N1 Predominant)","2014-15 (H3N2 Predominant)","2015-16 (H1N1 Predominant)",
                                             "2016-17 (H3N2 Predominant)","2017-18"), 
                          choiceValues = list("2010-11", "2011-12","2012-13","2013-14","2014-15","2015-16","2016-17","2017-18"),
-                         selected = "2016-17"),
+                         selected = "2017-18"),
       
           p("Include the 2017-2018 Baseline?*", style = "font-weight: bold"),
       
@@ -135,13 +137,47 @@ ui <- fluidPage(
       )#ED Age panel div closure
 
     ),#ED TabPanel closure
- 
+
+
+#==========================================ED DATA MAP (UI)=============================================================# 
+    tabPanel("ED Data by Zip Code", 
+             
+      sidebarLayout(
+        
+        sidebarPanel(width = 3,
+          
+          tags$head(tags$style("#EDmap{height:100vh !important;}")), #ensures map takes up as much vertical space as possible
+          
+          h3(strong("ED Data by Zip Code"), style = "padding-bottom: 10px"),
+          
+          p("Emergency department data are extracted from the CCDPH syndromic surveillance system, ESSENCE. Forty-five hospital
+              emergency departments participate in ESSENCE, including all hospitals located in Suburban Cook County. The map
+            displays the proportion of emergency room visits that were for influenza-like illness(ILI) by the patient's zip code of residence. 
+            ILI is defined as fever plus cough or sore throat.", align = "justify", style = "padding-bottom: 10px"),
+          
+          sliderInput(inputId = "mapweek",
+                      label = "Drag the slider to select the MMWR week of interest or click play to see an animation of all weeks to date:",
+                      min = 35, max = 38, #step = 1,
+                      value = 35,
+                      animate = animationOptions(interval = 3000)),
+          
+          checkboxInput(inputId = "hosploc", label = "Show hospital locations on map?")
+          
+        ), #ED map sidebar panel closure
+        
+        mainPanel(    
+      
+          leafletOutput("EDmap")
+    
+        ) #ED Map main panel closure
+      ) #ED Map sidebay layout closure
+    ),#ED Map TabPanel closure
 #==========================================LAB DATA (UI)=============================================================#
    
     tabPanel("Laboratory Data",
              
-      fluidRow(class = "labhero",
-        column(class = "labheader", 4, h3(strong("Laboratory Specimen Data"), style = "padding-bottom: 10px; padding-top: 5px"), 
+      fluidRow(
+        column( 4, h3(strong("Laboratory Specimen Data"), style = "padding-bottom: 10px; padding-top: 5px"), 
                              p("Laboratory testing data for influenza are submitted on a weekly basis from the following laboratories: 
                                 Illinois Department of Public Health Sentinel Laboratories, NorthShore University Health System, 
                                 Loyola University Medical Center, and ACL Laboratories. Laboratories submit aggregate data for all influenza tests 
@@ -183,8 +219,8 @@ ui <- fluidPage(
               
               checkboxGroupInput(inputId = "labpick", 
                                  label = "Display the Percent of Specimens Testing Positive for Influenza", 
-                                 choices = list("2015-16", "2016-17"),
-                                 selected = "2016-17") 
+                                 choices = list("2015-16", "2016-17", "2017-18"),
+                                 selected = "2017-18") 
               
             ),#lab line chart sidebarpanel closure
             
