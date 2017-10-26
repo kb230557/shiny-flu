@@ -46,10 +46,13 @@ ui <- fluidPage(
                         column(12, class = "homestrip", img(src="https://phil.cdc.gov/PHIL_Images/11213/11213_lores.jpg", class = "img-responsive imggen"))
                       )
                ),
-               #Building home page text
+               #Building home page text    
+               
+               #####!!!!!!!NOTE: Week number needs manual updating each week here - find alternate solution
+               
                column(7, h4(strong("Cook County Department of Public Health Weekly Influenza Surveillance"), style = "padding-bottom: 10px; padding-top: 5px"),
-                     HTML('<p id="risk">As of <strong>Week 40</strong>, the risk of influenza in Suburban Cook
-                           County is <strong>LOW</strong>.</p>'),
+                     HTML('<p id="risk">As of <strong>Week 41</strong>, the risk of influenza in Suburban Cook
+                           County is <strong>LOW</strong>.</p>'), 
                      p("The Cook County Department of Public Health collects and analyzes data on local influenza activity year-round. During periods when higher
                         influenza activity is expected (from MMWR Week 40 through MMWR Week 20), this information is compiled into a weekly surveillance
                        report that is distributed to our partners in the healthcare community, schools, community groups, and the public. This application
@@ -178,7 +181,7 @@ ui <- fluidPage(
           
            sliderInput(inputId = "mapweek",
                       label = "Drag the slider to select the MMWR week of interest or click play to see an animation of all weeks to date:",
-                      min = 35, max = (MMWRweek(Sys.Date()))[2] - 1, step = 1, ticks = FALSE, #Using MMWRweek function to automatically adjust slider max
+                      min = 35, max = getweek(Sys.Date()), step = 1, ticks = FALSE, #Using MMWRweek function to automatically adjust slider max: (MMWRweek(Sys.Date()))[2] - 1
                       value = 35,
                       animate = animationOptions(interval = 2500)),
           
