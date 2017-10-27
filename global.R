@@ -1,10 +1,12 @@
 library(MMWRweek)
 
-getweek <- function (testdate) {
-  if (weekdays(testdate) == "Friday") {
-     MMWRweek(testdate)[2] - 1 
+getweek <- function (mydate) {
+  if (weekdays(mydate) %in% c("Friday","Saturday")) {
+     MMWRweek(mydate)[2] - 1 
   }
   else { 
-    MMWRweek(testdate)[2] - 2 
+    MMWRweek(mydate)[2] - 2 
   }
 }
+
+

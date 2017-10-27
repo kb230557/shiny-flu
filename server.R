@@ -7,7 +7,7 @@ library("ggplot2")
 library("Cairo")
 library("sp")
 library("leaflet")
-library("MMWRweek")
+#library("MMWRweek")
 library("htmltools")
 library("DT")
 load("flu.Rdata")
@@ -210,11 +210,6 @@ server <- function(input, output) {
     return(temp)                                #Returning data frame for use in global environment
   })
   
-  #Creating color palette for map based on selected week
-  palbin <- reactive ({
-    bins <- c(0,1,2,4,6,8,10,Inf)
-    colorBin("Blues", mapdata()$Week, bins = bins, na.color=NA)
-  })
   
   #Creating labels for map based on selected week
   labels <- reactive ({
@@ -223,9 +218,6 @@ server <- function(input, output) {
   
   #Generating the base map so it doesn't need to be redrawn with each change 
   output$EDmap <- renderLeaflet({
-    
-    # pal <- palbin()  #See note below
-    # labs <- labels()
     
     leaflet(zips) %>% addProviderTiles(providers$CartoDB.Positron) %>% setView(lng = -87.86, lat = 41.8, zoom = 10) 
     
@@ -254,7 +246,9 @@ server <- function(input, output) {
   #Creating the rest of the map in observer functions so it will be re-drawn as options change
   observe ({
     
-    pal <- palbin()
+    #Creating color palette
+    bins <- c(0,1,2,4,6,8,10,Inf)
+    pal <- colorBin("Blues", bins = bins, na.color=NA)
     
     labs <- labels()
     

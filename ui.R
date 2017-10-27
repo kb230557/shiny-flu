@@ -5,7 +5,7 @@ library("ggplot2")
 library("Cairo")
 library("sp")
 library("leaflet")
-library("MMWRweek")
+#library("MMWRweek")
 library("htmltools")
 library("DT")
 
@@ -51,7 +51,7 @@ ui <- fluidPage(
                #####!!!!!!!NOTE: Week number needs manual updating each week here - find alternate solution
                
                column(7, h4(strong("Cook County Department of Public Health Weekly Influenza Surveillance"), style = "padding-bottom: 10px; padding-top: 5px"),
-                     HTML('<p id="risk">As of <strong>Week 41</strong>, the risk of influenza in Suburban Cook
+                     HTML('<p id="risk">As of <strong>Week 42</strong>, the risk of influenza in Suburban Cook
                            County is <strong>LOW</strong>.</p>'), 
                      p("The Cook County Department of Public Health collects and analyzes data on local influenza activity year-round. During periods when higher
                         influenza activity is expected (from MMWR Week 40 through MMWR Week 20), this information is compiled into a weekly surveillance
