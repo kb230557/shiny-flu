@@ -1,15 +1,5 @@
 
-#Loading packages, and importing data
-
-library("shiny")
-library("dplyr")
-library("ggplot2")
-library("Cairo")
-library("sp")
-library("leaflet")
-#library("MMWRweek")
-library("htmltools")
-library("DT")
+#Importing data
 load("flu.Rdata")
 
 server <- function(input, output) {

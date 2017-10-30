@@ -1,13 +1,4 @@
 
-library("shiny")
-library("dplyr")
-library("ggplot2")
-library("Cairo")
-library("sp")
-library("leaflet")
-#library("MMWRweek")
-library("htmltools")
-library("DT")
 
 ui <- fluidPage(
   
@@ -48,11 +39,10 @@ ui <- fluidPage(
                ),
                #Building home page text    
                
-               #####!!!!!!!NOTE: Week number needs manual updating each week here - find alternate solution
                
                column(7, h4(strong("Cook County Department of Public Health Weekly Influenza Surveillance"), style = "padding-bottom: 10px; padding-top: 5px"),
-                     HTML('<p id="risk">As of <strong>Week 42</strong>, the risk of influenza in Suburban Cook
-                           County is <strong>LOW</strong>.</p>'), 
+                     p(id="risk", "As of ",strong(paste0("Week ", getweek(Sys.Date())))," the risk of influenza in Suburban Cook
+                           County is ", strong("LOW")), 
                      p("The Cook County Department of Public Health collects and analyzes data on local influenza activity year-round. During periods when higher
                         influenza activity is expected (from MMWR Week 40 through MMWR Week 20), this information is compiled into a weekly surveillance
                        report that is distributed to our partners in the healthcare community, schools, community groups, and the public. This application
@@ -63,8 +53,8 @@ ui <- fluidPage(
                      p("Influenza surveillance data is collected from multiple sources including emergency department (ED) visits, visits to outpatient
                        sentinel healthcare providers, laboratory tests, intensive-care unit (ICU) hospitalizations, and deaths. The goal of influenza
                        surveillance is to determine when and where influenza activity is occuring, what influenza viruses are circulating, and the amount of
-                       severe outcomes, such as hospitalizations and deaths, that can be attributed to influenza.", align = "justify",
-                       style = "padding-bottom: 10px"),
+                       severe outcomes, such as hospitalizations and deaths, that can be attributed to influenza. Data in this application will be updated
+                       on Friday afternoons.", align = "justify", style = "padding-bottom: 10px"),
                      p(id = "info", "For more information on influenza, please visit the Centers for Disease Control and Prevention at ",
                        a(href = "https://www.cdc.gov/flu/", "https://www.cdc.gov/flu/. "), "Information and recommendations for healthcare professionals
                        can be found ", a(href = "https://www.cdc.gov/flu/professionals/index.htm", "here.")),
