@@ -59,6 +59,7 @@ server <- function(input, output) {
     #without placing the plot in a reactive function)
     # p <- edyrplot()
     # print(p)
+    #Explore plotly and ggiraph for potential solutions
     
     ggplot(data = userdatayr(), aes(x = CDC_Week, y = ED_ILI, color = Season)) +
       geom_point(size = 3) + #######Consider size=4 paired with line size = 2 

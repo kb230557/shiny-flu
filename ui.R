@@ -87,19 +87,26 @@ ui <- fluidPage(
           checkboxGroupInput(inputId = "seasonpick", #inputID is used in server function to subset user-selected data 
                          label = "Display ED Data by Season for Suburban Cook County", 
                          choiceNames = list("2010-11 (Mixed Strain Predominant)", "2011-12 (H3N2 Predominant)","2012-13 (H3N2 Predominant)",
-                                            "2013-14 (H1N1 Predominant)","2014-15 (H3N2 Predominant)","2015-16 (H1N1 Predominant)",
+                                            "2013-14 (H1N1 Predominant)","2014-15 (H3N2 Predominant)*","2015-16 (H1N1 Predominant)",
                                             "2016-17 (H3N2 Predominant)","2017-18"), 
                          choiceValues = list("2010-11", "2011-12","2012-13","2013-14","2014-15","2015-16","2016-17","2017-18"),
                          selected = "2017-18"),
       
-          p("Include the 2017-2018 Baseline?*", style = "font-weight: bold"),
+          p("Include the 2017-2018 Baseline?", tags$sup(HTML('&#167'), style = "font-weight: normal"), style = "font-weight: bold"),
       
-          checkboxInput(inputId = "baselinecheck", label = "2017-2018 Baseline"),
+          checkboxInput(inputId = "baselinecheck", label = "2017-2018 Baseline", value = TRUE),
+          
+      #Adding footnotes  
+          tags$div(tags$small("* Influenza surveillance data are aggregated by MMWR week. Most years have 52 weeks; however some have 53 weeks. 
+                     2014 was a 53-week year. Because the last week of the calendar year is epidemiologically important for flu transmission, we have 
+                     graphed Week 53 of the 2014-15 season with Week 52 of the other flu seasons. Consequently, all other data points prior to Week 53 
+                     for the 2014-15 season have been moved forward one week, i.e., Week 52 displayed as Week 51, and so on.",
+                     style = "font-style: italic"), style = "padding-bottom: 10px"),
       
-          tags$small("*The baseline value reflects the expected proportion of ED visits for ILI during 'non-influenza' weeks. Non-influenza weeks are defined as 
+          tags$div(tags$small(HTML('&#167'), "The baseline value reflects the expected proportion of ED visits for ILI during 'non-influenza' weeks. Non-influenza weeks are defined as 
                  periods of two or more consecutive weeks in which each week accounted for less than 2% of the season's total number of specimens that 
                  tested positive for influenza. Data from the previous three influenza seasons are used to calculate the baseline value.",
-                 style = "font-style: italic; ")
+                 style = "font-style: italic; "))
         ),#ED season sidebarpanel closure
     
     #Building main panel with plot and download functionality
@@ -127,10 +134,12 @@ ui <- fluidPage(
         sidebarPanel(
       
           checkboxGroupInput(inputId = "agepick", 
-                         label = "Display ED Data by Age for Suburban Cook County", 
+                         label = "Display ED Data by Age for Suburban Cook County*", 
                          choiceNames = list("0-4 year olds", "5-17 year olds","18-64 year olds", "65 years and older","All age groups"), 
                          choiceValues = list("0-4", "5-17","18-64","65+","All"),
-                         selected = "All") 
+                         selected = "All"),
+          
+          tags$small("*For the current influenza season", style = "font-style: italic; ")
 
         ),#ED Age sidebarpanel closure
     
@@ -171,9 +180,9 @@ ui <- fluidPage(
           
            sliderInput(inputId = "mapweek",
                       label = "Drag the slider to select the MMWR week of interest or click play to see an animation of all weeks to date:",
-                      min = 35, max = getweek(Sys.Date()), step = 1, ticks = FALSE, #Using MMWRweek function to automatically adjust slider max: (MMWRweek(Sys.Date()))[2] - 1
+                      min = 35, max = getweek(Sys.Date()), step = 1, ticks = FALSE, #Using MMWRweek function to automatically adjust slider max
                       value = 35,
-                      animate = animationOptions(interval = 2500)),
+                      animate = animationOptions(interval = 2000)),
           
            checkboxInput(inputId = "hosploc", label = "Show hospital locations on map?")
           
