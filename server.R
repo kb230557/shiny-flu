@@ -5,7 +5,7 @@ load("flu.Rdata")
 server <- function(input, output) {
   
   #Improves graphics quality
-  options(shiny.usecairo=T)
+  #options(shiny.usecairo=T)
   
   
   #==========================================ED DATA BY SEASON (SERVER)=============================================================#
@@ -38,10 +38,10 @@ server <- function(input, output) {
   edyrplot <- reactive({
     
     ggplot(data = userdatayr(), aes(x = CDC_Week, y = ED_ILI, color = Season)) +
-      geom_point(size = 3) + 
+      geom_point(size = 3) + #######Consider size=4 paired with line size = 2 
       geom_line(aes(group = Season, linetype = Season), size = 1) +
-      geom_hline(yintercept = ifelse(input$baselinecheck, 1.02, -.1), color = "black", linetype = "F1") +
-      labs(title = "Proportion of ED Visits for ILI, Suburban Cook County", x = "MMWR Week", y = "% of Visits for ILI") +
+      geom_hline(yintercept = ifelse(input$baselinecheck, 1.06, -.1), color = "black", linetype = "F1") +
+      labs(title = "Proportion of ED Visits for ILI, Suburban Cook County\n", x = "MMWR Week", y = "% of Visits for ILI") +
       scale_color_manual(values = groupcolorsyr) +
       scale_linetype_manual(values = grouplinesyr) +
       scale_y_continuous(limits = c(0,6), expand = c(0,0)) +
@@ -50,6 +50,7 @@ server <- function(input, output) {
             panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line())
     
   })
+  
   
   #Creating plot of user-selected data to display on the app (see note below)
   output$seasonplot <- renderPlot({
@@ -143,6 +144,7 @@ server <- function(input, output) {
       theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), legend.title = element_text(size = 14, face = "bold"), 
             legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 10),
             panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line())
+    
   })
   
   #Plot for download handler
@@ -151,14 +153,13 @@ server <- function(input, output) {
     ggplot(data = userdataage(), aes(x = Week_Number, y = ED_ILI, color = Age_Group)) +
       geom_point(size = 3) + 
       geom_line(aes(group = Age_Group, linetype = Age_Group), size = 1) +
-      labs(title = "Proportion of ED Visits for ILI by Age Group, Suburban Cook County", x = "MMWR Week", y = "% of Visits for ILI") +
+      labs(title = "Proportion of ED Visits for ILI by Age Group, Suburban Cook County\n", x = "MMWR Week", y = "% of Visits for ILI") +
       scale_color_manual(values = groupcolorsage, name = "Age Group") +
       scale_linetype_manual(values = grouplinesage, name = "Age Group") +
       scale_y_continuous(limits = c(0,8), expand = c(0,0)) +
       theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), legend.title = element_text(size = 14, face = "bold"), 
             legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 10),
             panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line())
-    
     
   })
   
@@ -331,7 +332,7 @@ server <- function(input, output) {
   groupcolorsperpos <- c("2017-18" = "#C96E85", "2016-17" = "#6E9DC9","2015-16" = "#979CA1")
 
   userdatalabline = reactive({
-    return(unique(labcount[labcount$Season %in% input$labpick,1:3])) 
+    return(unique(labcount[labcount$Season %in% input$labpick,1:4])) 
   })
   
   #Plot for app display

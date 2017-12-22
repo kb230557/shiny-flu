@@ -68,6 +68,26 @@ Home Tab
    font-size: 12px;
 }
 
+
+/*
+==================================
+Map Slider
+=================================
+*/
+.js-irs-0 .irs-bar {
+border-top-color: #CCC;
+border-bottom-color: #CCC;
+}
+
+.js-irs-0 .irs-bar-edge {
+border-color: #CCC;
+}
+
+.js-irs-0 .irs-bar-edge, .js-irs-0 .irs-bar {
+background: #EEE;
+}
+
+
 /*
 ==================================
 General Styles

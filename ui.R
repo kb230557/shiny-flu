@@ -42,7 +42,7 @@ ui <- fluidPage(
                
                column(7, h4(strong("Cook County Department of Public Health Weekly Influenza Surveillance"), style = "padding-bottom: 10px; padding-top: 5px"),
                      p(id="risk", "As of ",strong(paste0("Week ", getweek(Sys.Date())))," the risk of influenza in Suburban Cook
-                           County is ", strong("LOW")), 
+                           County is ", strong("INCREASING.")), 
                      p("The Cook County Department of Public Health collects and analyzes data on local influenza activity year-round. During periods when higher
                         influenza activity is expected (from MMWR Week 40 through MMWR Week 20), this information is compiled into a weekly surveillance
                        report that is distributed to our partners in the healthcare community, schools, community groups, and the public. This application
@@ -182,7 +182,7 @@ ui <- fluidPage(
                       label = "Drag the slider to select the MMWR week of interest or click play to see an animation of all weeks to date:",
                       min = 35, max = getweek(Sys.Date()), step = 1, ticks = FALSE, #Using MMWRweek function to automatically adjust slider max
                       value = 35,
-                      animate = animationOptions(interval = 2000)),
+                      animate = animationOptions(interval = 1500)),
           
            checkboxInput(inputId = "hosploc", label = "Show hospital locations on map?")
           
