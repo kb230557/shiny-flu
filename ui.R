@@ -41,8 +41,8 @@ ui <- fluidPage(
                
                
                column(7, h4(strong("Cook County Department of Public Health Weekly Influenza Surveillance"), style = "padding-bottom: 10px; padding-top: 5px"),
-                     p(id="risk", "As of ",strong(paste0("Week ", getweek(Sys.Date())))," the risk of influenza in Suburban Cook
-                           County is ", strong("INCREASING.")), 
+                     p(id="risk", "As of ",strong("Week 1")," the risk of influenza in Suburban Cook
+                           County is ", strong("HIGH.")),   #Retired - auto week calculation: paste0("Week ", getweek(Sys.Date())); NEEDS MANUAL ADJUSTMENT EACH WEEK
                      p("The Cook County Department of Public Health collects and analyzes data on local influenza activity year-round. During periods when higher
                         influenza activity is expected (from MMWR Week 40 through MMWR Week 20), this information is compiled into a weekly surveillance
                        report that is distributed to our partners in the healthcare community, schools, community groups, and the public. This application
@@ -179,12 +179,15 @@ ui <- fluidPage(
             ILI is defined as fever plus cough or sore throat.", align = "justify", style = "padding-bottom: 10px"),
           
            sliderInput(inputId = "mapweek",
-                      label = "Drag the slider to select the MMWR week of interest or click play to see an animation of all weeks to date:",
-                      min = 35, max = getweek(Sys.Date()), step = 1, ticks = FALSE, #Using MMWRweek function to automatically adjust slider max
-                      value = 35,
+                      label = "Drag the slider to select the week of interest* or click play to see an animation of all weeks to date:",
+                      min = as.Date("2017-09-02"), max = as.Date("2018-01-06"), step = 7, ticks = FALSE, #MAX DATE NEEDS MANUAL ADJUSTMENT EACH WEEK
+                      value = as.Date("2017-09-02"), timeFormat = "%m-%d-%y",
                       animate = animationOptions(interval = 1500)),
           
-           checkboxInput(inputId = "hosploc", label = "Show hospital locations on map?")
+           checkboxInput(inputId = "hosploc", label = "Show hospital locations on map?"),
+           
+           tags$div(tags$small("* Week ending date is displayed.",
+                               style = "font-style: italic")) #, style = "padding-bottom: 10px")
           
         ), #ED map sidebar panel closure
         

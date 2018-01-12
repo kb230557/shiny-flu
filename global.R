@@ -10,14 +10,14 @@ library("MMWRweek")
 library("htmltools")
 library("DT")
 
-#Creating a function so correct week will be automatically updated in risk assessment and map slider
-getweek <- function (mydate) {
-  if (weekdays(mydate) %in% c("Friday","Saturday")) {
-     MMWRweek(mydate)[2] - 1 
-  }
-  else { 
-    MMWRweek(mydate)[2] - 2 
-  }
-}
+#Function so correct week will be automatically updated in risk assessment and map slider - retired after slider format changed to dates
+# getweek <- function (mydate) {
+#   if (weekdays(mydate) %in% c("Friday","Saturday")) {
+#      MMWRweek(mydate)[2] - 1 
+#   }
+#   else { 
+#     MMWRweek(mydate)[2] - 2 
+#   }
+# }
 
 

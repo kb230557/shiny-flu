@@ -69,7 +69,7 @@ server <- function(input, output) {
       labs(title = "Proportion of ED Visits for ILI, Suburban Cook County\n", x = "MMWR Week", y = "% of Visits for ILI") +
       scale_color_manual(values = groupcolorsyr) +
       scale_linetype_manual(values = grouplinesyr) +
-      scale_y_continuous(limits = c(0,6), expand = c(0,0)) +
+      scale_y_continuous(limits = c(0,6), expand = c(0,0)) + 
       theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), legend.title = element_text(size = 14, face = "bold"), 
             legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 10),
             panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line())
@@ -140,7 +140,7 @@ server <- function(input, output) {
       labs(title = "Proportion of ED Visits for ILI by Age Group, Suburban Cook County\n", x = "MMWR Week", y = "% of Visits for ILI") +
       scale_color_manual(values = groupcolorsage, name = "Age Group") +
       scale_linetype_manual(values = grouplinesage, name = "Age Group") +
-      scale_y_continuous(limits = c(0,8), expand = c(0,0)) +
+      scale_y_continuous(limits = c(0,12), expand = c(0,0)) +
       theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), legend.title = element_text(size = 14, face = "bold"), 
             legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 10),
             panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line())
@@ -156,7 +156,7 @@ server <- function(input, output) {
       labs(title = "Proportion of ED Visits for ILI by Age Group, Suburban Cook County\n", x = "MMWR Week", y = "% of Visits for ILI") +
       scale_color_manual(values = groupcolorsage, name = "Age Group") +
       scale_linetype_manual(values = grouplinesage, name = "Age Group") +
-      scale_y_continuous(limits = c(0,8), expand = c(0,0)) +
+      scale_y_continuous(limits = c(0,12), expand = c(0,0)) +
       theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), legend.title = element_text(size = 14, face = "bold"), 
             legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 10),
             panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line())
@@ -195,9 +195,16 @@ server <- function(input, output) {
   
   #==========================================ED MAP DATA (SERVER)=============================================================#
   
+  
+  #Calculating MMWR week number from sliderinput selected date then translating to matching column position in zips data file
+  tempweek <- reactive ({
+    return(ifelse(MMWRweek(input$mapweek)[1,1] == 2017, MMWRweek(input$mapweek)[1,2] - 24, MMWRweek(input$mapweek)[1,2] + 28))
+  })
+  
+  
   #Subsetting data to select only spatial data and selected week for ED values
   mapdata <- reactive ({
-    temp <- zips[,c(1:10,(input$mapweek-24))]   #Subset based on input from UI
+    temp <- zips[,c(1:10, tempweek())]   #Subset spatial data plus selected week based on column position
     names(temp) <- gsub("_.*","",names(temp))   #Renaming selected week to non-specific "Week" for use in later functions
     return(temp)                                #Returning data frame for use in global environment
   })
@@ -343,7 +350,7 @@ server <- function(input, output) {
       geom_line(aes(group = Season), size = 1) +
       labs(title = "Percent of Lab Specimens Positive for Influenza\n", x = "MMWR Week", y = "% of Positive Specimens") +
       scale_color_manual(values = groupcolorsperpos, name = "Season") +
-      scale_y_continuous(limits = c(0,35), expand = c(0,0)) +
+      scale_y_continuous(limits = c(0,40), expand = c(0,0)) +
       theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), legend.title = element_text(size = 14, face = "bold"), 
             legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 10),
             panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line())
@@ -358,7 +365,7 @@ server <- function(input, output) {
       geom_line(aes(group = Season), size = 1) +
       labs(title = "Percent of Lab Specimens Positive for Influenza\n", x = "MMWR Week", y = "% of Positive Specimens") +
       scale_color_manual(values = groupcolorsperpos, name = "Season") +
-      scale_y_continuous(limits = c(0,35), expand = c(0,0)) +
+      scale_y_continuous(limits = c(0,40), expand = c(0,0)) +
       theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), legend.title = element_text(size = 14, face = "bold"), 
             legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 10),
             panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line())
