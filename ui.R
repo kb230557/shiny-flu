@@ -38,13 +38,16 @@ ui <- fluidPage(
                       )
                ),
                #Building home page text    
-               
+              
+#########################################################################################################################################
+#UPDATE THE WEEK NUMBER IN THE FIRST P SECTION IN "STRONG("WEEK X")" BELOW. UPDATE RISK LEVEL WHEN NEEDED.#
+#########################################################################################################################################
                
                column(7, h4(strong("Cook County Department of Public Health Weekly Influenza Surveillance"), style = "padding-bottom: 10px; padding-top: 5px"),
-                     p(id="risk", "As of ",strong("Week 1")," the risk of influenza in Suburban Cook
-                           County is ", strong("HIGH.")),   #Retired - auto week calculation: paste0("Week ", getweek(Sys.Date())); NEEDS MANUAL ADJUSTMENT EACH WEEK
+                     p(id="risk", "As of ",strong("Week 42")," the risk of influenza in Suburban Cook
+                           County is ", strong("LOW.")),   
                      p("The Cook County Department of Public Health collects and analyzes data on local influenza activity year-round. During periods when higher
-                        influenza activity is expected (from MMWR Week 40 through MMWR Week 20), this information is compiled into a weekly surveillance
+                        influenza activity is expected (from MMWR Week 40 through MMWR Week 20*), this information is compiled into a weekly surveillance
                        report that is distributed to our partners in the healthcare community, schools, community groups, and the public. This application
                        is a companion to our weekly surveillance report. Copies of the reports can be found",
                        a(href = "http://cookcountypublichealth.org/data-reports/communicable-diseases", "here."), "This application is currently in ",
@@ -55,6 +58,9 @@ ui <- fluidPage(
                        surveillance is to determine when and where influenza activity is occuring, what influenza viruses are circulating, and the amount of
                        severe outcomes, such as hospitalizations and deaths, that can be attributed to influenza. Data in this application will be updated
                        on Friday afternoons.", align = "justify", style = "padding-bottom: 10px"),
+                     p("*The Centers for Disease Control and Prevention aggregates influenza data by ", a(href = "https://wwwn.cdc.gov/nndss/document/W2018-19.pdf",
+                        "MMWR Weeks. "), "MMWR Weeks run from Sunday to Saturday. For simplicity, graphs in this application typically display the last day of the MMWR Week 
+                        on the x axis. Ending dates are accurate for 2018 and 2019 but are approximations for all other years displayed."),
                      p(id = "info", "For more information on influenza, please visit the Centers for Disease Control and Prevention at ",
                        a(href = "https://www.cdc.gov/flu/", "https://www.cdc.gov/flu/. "), "Information and recommendations for healthcare professionals
                        can be found ", a(href = "https://www.cdc.gov/flu/professionals/index.htm", "here.")),
@@ -88,13 +94,13 @@ ui <- fluidPage(
                          label = "Display ED Data by Season for Suburban Cook County", 
                          choiceNames = list("2010-11 (Mixed Strain Predominant)", "2011-12 (H3N2 Predominant)","2012-13 (H3N2 Predominant)",
                                             "2013-14 (H1N1 Predominant)","2014-15 (H3N2 Predominant)*","2015-16 (H1N1 Predominant)",
-                                            "2016-17 (H3N2 Predominant)","2017-18"), 
-                         choiceValues = list("2010-11", "2011-12","2012-13","2013-14","2014-15","2015-16","2016-17","2017-18"),
-                         selected = "2017-18"),
+                                            "2016-17 (H3N2 Predominant)","2017-18 (H3N2 Predominant)", "2018-19"), 
+                         choiceValues = list("2010-11", "2011-12","2012-13","2013-14","2014-15","2015-16","2016-17","2017-18", "2018-19"),
+                         selected = "2018-19"),
       
-          p("Include the 2017-2018 Baseline?", tags$sup(HTML('&#167'), style = "font-weight: normal"), style = "font-weight: bold"),
+          p("Include the 2018-19 Baseline?", tags$sup(HTML('&#167'), style = "font-weight: normal"), style = "font-weight: bold"),
       
-          checkboxInput(inputId = "baselinecheck", label = "2017-2018 Baseline", value = TRUE),
+          checkboxInput(inputId = "baselinecheck", label = "2018-19 Baseline", value = TRUE),
           
       #Adding footnotes  
           tags$div(tags$small("* Influenza surveillance data are aggregated by MMWR week. Most years have 52 weeks; however some have 53 weeks. 
@@ -178,11 +184,15 @@ ui <- fluidPage(
             displays the proportion of emergency room visits that were for influenza-like illness(ILI) by the patient's zip code of residence. 
             ILI is defined as fever plus cough or sore throat.", align = "justify", style = "padding-bottom: 10px"),
           
+#########################################################################################################################################
+#UPDATE THE WEEK ENDING DATE IN "MAX = AS.DATE()" BELOW#
+#########################################################################################################################################
+           
            sliderInput(inputId = "mapweek",
                       label = "Drag the slider to select the week of interest* or click play to see an animation of all weeks to date:",
-                      min = as.Date("2017-09-02"), max = as.Date("2018-01-06"), step = 7, ticks = FALSE, #MAX DATE NEEDS MANUAL ADJUSTMENT EACH WEEK
-                      value = as.Date("2017-09-02"), timeFormat = "%m-%d-%y",
-                      animate = animationOptions(interval = 1500)),
+                      min = as.Date("2018-09-01"), max = as.Date("2018-10-20"), step = 7, ticks = FALSE, #MAX DATE NEEDS MANUAL ADJUSTMENT EACH WEEK
+                      value = as.Date("2018-09-01"), timeFormat = "%m-%d-%y",
+                      animate = animationOptions(interval = 1200)),
           
            checkboxInput(inputId = "hosploc", label = "Show hospital locations on map?"),
            
@@ -249,8 +259,8 @@ ui <- fluidPage(
               
               checkboxGroupInput(inputId = "labpick", 
                                  label = "Display the Percent of Specimens Testing Positive for Influenza", 
-                                 choices = list("2015-16", "2016-17", "2017-18"),
-                                 selected = "2017-18") 
+                                 choices = list("2015-16", "2016-17", "2017-18", "2018-19"),
+                                 selected = "2018-19") 
               
             ),#lab line chart sidebarpanel closure
             
@@ -289,9 +299,9 @@ tabPanel("ICU Hospitalizations", id = "ICU",
              
              checkboxGroupInput(inputId = "icuseason", 
                                 label = "Display ICU Hospitalizations by Season:", 
-                                choiceNames = list("2015-16 (H1N1 Predominant)", "2016-17 (H3N2 Predominant)", "2017-18"), 
-                                choiceValues = list("2015-16","2016-17","2017-18"),
-                                selected = "2017-18")
+                                choiceNames = list("2015-16 (H1N1 Predominant)", "2016-17 (H3N2 Predominant)", "2017-18 (H3N2 Predominant)", "2018-19"), 
+                                choiceValues = list("2015-16","2016-17","2017-18", "2018-19"),
+                                selected = "2018-19")
              
            ),#icu sidebarpanel closure
            
@@ -353,7 +363,7 @@ tabPanel("Mortality", id = "PI",
 
                  p("Select a season to view raw (unsmoothed) P/I mortality data in the table.", align = "justify", style = "padding-bottom: 10px"),
 
-                 selectInput("piyear","Season:", choices = list("2013-14","2014-15","2015-16","2016-17","2017-18"), selected = "2017-18")
+                 selectInput("piyear","Season:", choices = list("2013-14","2014-15","2015-16","2016-17","2017-18", "2018-19"), selected = "2018-19")
 
                ),#pi sidebarpanel closure 2
 

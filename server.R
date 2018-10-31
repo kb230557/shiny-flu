@@ -4,7 +4,7 @@ load("flu.Rdata")
 
 server <- function(input, output) {
   
-  #Improves graphics quality
+  #Improves graphics quality (didn't end up needing)
   #options(shiny.usecairo=T)
   
   
@@ -27,52 +27,35 @@ server <- function(input, output) {
   #Assigning colors - used W3Schools color picker (https://www.w3schools.com/colors/colors_picker.asp) to select hues based off blue in border and logo (#6e9dc9)
   #Selected variation on red, yellow, and orange hues with higher saturation for brightness 
   groupcolorsyr <- c("2010-11" = "#6ec9b2", "2011-12" = "#6ec96e", "2012-13" = "#6e6ec9", "2013-14" = "#dcdc5b",
-                     "2014-15" = "#c96eb2", "2015-16" = "#e69c51", "2016-17" = "#6E9DC9", "2017-18" = "#eb4c4c")
+                     "2014-15" = "#c96eb2", "2015-16" = "#e69c51", "2016-17" = "#6E9DC9", "2017-18" = "#4cebeb", "2018-19" = "#eb4c4c")
   
   #Assigning line type (used vector assignment for easier adjustment in the future if needed)
   grouplinesyr <- c("2010-11" = 1, "2011-12" = 1, "2012-13" = 1, "2013-14" = 1, 
-                    "2014-15" = 1, "2015-16" = 1, "2016-17" = 1, "2017-18" = 1)
+                    "2014-15" = 1, "2015-16" = 1, "2016-17" = 1, "2017-18" = 1, "2018-19" = 1)
   
   
   #Creating plot of user-selected data to use in the download image function 
   edyrplot <- reactive({
     
-    ggplot(data = userdatayr(), aes(x = CDC_Week, y = ED_ILI, color = Season)) +
+    ggplot(data = userdatayr(), aes(x = Week_Start, y = ED_ILI, color = Season)) +
       geom_point(size = 3) + #######Consider size=4 paired with line size = 2 
       geom_line(aes(group = Season, linetype = Season), size = 1) +
       geom_hline(yintercept = ifelse(input$baselinecheck, 1.06, -.1), color = "black", linetype = "F1") +
-      labs(title = "Proportion of ED Visits for ILI, Suburban Cook County\n", x = "MMWR Week", y = "% of Visits for ILI") +
+      labs(title = "Proportion of ED Visits for ILI, Suburban Cook County\n", x = "MMWR Week Ending Date", y = "% of Visits for ILI") +
       scale_color_manual(values = groupcolorsyr) +
       scale_linetype_manual(values = grouplinesyr) +
-      scale_y_continuous(limits = c(0,6), expand = c(0,0)) +
+      scale_y_continuous(limits = c(0,7), expand = c(0,0)) +
       theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), legend.title = element_text(size = 14, face = "bold"), 
-            legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 10),
-            panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line())
+            legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 12),
+            axis.text.x = element_text(angle = 70, hjust = 1), panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line())
     
   })
   
   
-  #Creating plot of user-selected data to display on the app (see note below)
+  #Creating plot of user-selected data to display on the app 
   output$seasonplot <- renderPlot({
     
-    ########### NOTE - Two lines below are more efficient and legible than duplicating plot function from above however, I can't get 
-    #hover functionality to work unless renderPlot contains a gglot2 function (and I can't find any solutions that use the downloadHandler
-    #without placing the plot in a reactive function)
-    # p <- edyrplot()
-    # print(p)
-    #Explore plotly and ggiraph for potential solutions
-    
-    ggplot(data = userdatayr(), aes(x = CDC_Week, y = ED_ILI, color = Season)) +
-      geom_point(size = 3) + #######Consider size=4 paired with line size = 2 
-      geom_line(aes(group = Season, linetype = Season), size = 1) +
-      geom_hline(yintercept = ifelse(input$baselinecheck, 1.06, -.1), color = "black", linetype = "F1") +
-      labs(title = "Proportion of ED Visits for ILI, Suburban Cook County\n", x = "MMWR Week", y = "% of Visits for ILI") +
-      scale_color_manual(values = groupcolorsyr) +
-      scale_linetype_manual(values = grouplinesyr) +
-      scale_y_continuous(limits = c(0,6), expand = c(0,0)) + 
-      theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), legend.title = element_text(size = 14, face = "bold"), 
-            legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 10),
-            panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line())
+    edyrplot()
     
   })
   
@@ -130,36 +113,27 @@ server <- function(input, output) {
   groupcolorsage <- c("0-4" = "#6E9DC9", "5-17" = "#C96E85", "18-64" = "#6EC985", "65+" = "#C99C6E", "All" = "#979CA1")
   
   grouplinesage <- c("0-4" = 1, "5-17" = 1, "18-64" = 1, "65+" = 1, "All" = 5)
+
+  #Plot for download handler
+  edageplot <- reactive({
+    
+    ggplot(data = userdataage(), aes(x = Week_Start, y = ED_ILI, color = Age_Group)) +
+      geom_point(size = 3) + 
+      geom_line(aes(group = Age_Group, linetype = Age_Group), size = 1) +
+      labs(title = "Proportion of ED Visits for ILI by Age Group, Suburban Cook County\n", x = "MMWR Week Ending Date", y = "% of Visits for ILI") +
+      scale_color_manual(values = groupcolorsage, name = "Age Group") +
+      scale_linetype_manual(values = grouplinesage, name = "Age Group") +
+      scale_y_continuous(limits = c(0,13), expand = c(0,0)) +
+      theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), legend.title = element_text(size = 14, face = "bold"), 
+            legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 12),
+            axis.text.x = element_text(angle = 70, hjust = 1), panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line())
+    
+  })
   
   #Plot for app display
   output$ageplot <- renderPlot({
     
-    ggplot(data = userdataage(), aes(x = Week_Number, y = ED_ILI, color = Age_Group)) +
-      geom_point(size = 3) + 
-      geom_line(aes(group = Age_Group, linetype = Age_Group), size = 1) +
-      labs(title = "Proportion of ED Visits for ILI by Age Group, Suburban Cook County\n", x = "MMWR Week", y = "% of Visits for ILI") +
-      scale_color_manual(values = groupcolorsage, name = "Age Group") +
-      scale_linetype_manual(values = grouplinesage, name = "Age Group") +
-      scale_y_continuous(limits = c(0,12), expand = c(0,0)) +
-      theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), legend.title = element_text(size = 14, face = "bold"), 
-            legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 10),
-            panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line())
-    
-  })
-  
-  #Plot for download handler
-  edageplot <- reactive({
-    
-    ggplot(data = userdataage(), aes(x = Week_Number, y = ED_ILI, color = Age_Group)) +
-      geom_point(size = 3) + 
-      geom_line(aes(group = Age_Group, linetype = Age_Group), size = 1) +
-      labs(title = "Proportion of ED Visits for ILI by Age Group, Suburban Cook County\n", x = "MMWR Week", y = "% of Visits for ILI") +
-      scale_color_manual(values = groupcolorsage, name = "Age Group") +
-      scale_linetype_manual(values = grouplinesage, name = "Age Group") +
-      scale_y_continuous(limits = c(0,12), expand = c(0,0)) +
-      theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), legend.title = element_text(size = 14, face = "bold"), 
-            legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 10),
-            panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line())
+    edageplot()
     
   })
   
@@ -198,7 +172,7 @@ server <- function(input, output) {
   
   #Calculating MMWR week number from sliderinput selected date then translating to matching column position in zips data file
   tempweek <- reactive ({
-    return(ifelse(MMWRweek(input$mapweek)[1,1] == 2017, MMWRweek(input$mapweek)[1,2] - 24, MMWRweek(input$mapweek)[1,2] + 28))
+    return(ifelse(MMWRweek(input$mapweek)[1,1] == 2018, MMWRweek(input$mapweek)[1,2] - 24, MMWRweek(input$mapweek)[1,2] + 28))
   })
   
   
@@ -299,7 +273,7 @@ server <- function(input, output) {
   groupcolorslab <- c("A (H1N1)" = "#b5cde3", "A (H3N2)" = "#376895", "A (Unknown Subtype)" = "#6E9DC9", "B" = "#C96E85")
   
   userdatalabbar = reactive({
-      return(labcount[(labcount$Subtype %in% input$labbarstrain) & (labcount$Season == "2017-18"), ]) 
+      return(labcount[(labcount$Subtype %in% input$labbarstrain) & (labcount$Season == "2018-19"), ]) 
   })
   
   #NOTE: Explored hover functionality for bar plots but was unsuccessful, work on a solution at later date 
@@ -308,14 +282,14 @@ server <- function(input, output) {
   #Plot for download handler
   labbplot <- reactive({
     
-    ggplot(userdatalabbar(), aes(x = Week, y = Count, fill = Subtype)) +
+    ggplot(userdatalabbar(), aes(x = Week_Start, y = Count, fill = Subtype)) +
       geom_col(position = input$labbartype) +
-      labs(title = "Number of Laboratory Specimens Positive for Influenza by Strain", x = "MMWR Week", y = "Count") +
+      labs(title = "Number of Laboratory Specimens Positive for Influenza by Strain", x = "MMWR Week Ending Date", y = "Count") +
       scale_fill_manual(values = groupcolorslab, name = "Strain") +
       scale_y_continuous(expand = c(0,0)) +
       theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), legend.title = element_text(size = 14, face = "bold"), 
-            legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 10),
-            panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line())
+            legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 12),
+            axis.text.x = element_text(angle = 70, hjust = 1), panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line())
     
     
   })
@@ -323,8 +297,7 @@ server <- function(input, output) {
   #Plot for app display
   output$labbarplot <- renderPlot({
     
-    p <- labbplot()
-    print(p)
+   labbplot()
     
   })
   
@@ -336,39 +309,33 @@ server <- function(input, output) {
   )
   
   #========LINE PLOT=======#
-  groupcolorsperpos <- c("2017-18" = "#C96E85", "2016-17" = "#6E9DC9","2015-16" = "#979CA1")
+  groupcolorsperpos <- c("2018-19" = "#C96E85", "2017-18" = "#376895", "2016-17" = "#6E9DC9","2015-16" = "#b5cde3")
 
   userdatalabline = reactive({
     return(unique(labcount[labcount$Season %in% input$labpick,1:4])) 
   })
   
-  #Plot for app display
-  output$lablineplot <- renderPlot({
-    
-    ggplot(data = userdatalabline(), aes(x = Week, y = Percent_Pos, color = Season)) +
-      geom_point(size = 3) + 
-      geom_line(aes(group = Season), size = 1) +
-      labs(title = "Percent of Lab Specimens Positive for Influenza\n", x = "MMWR Week", y = "% of Positive Specimens") +
-      scale_color_manual(values = groupcolorsperpos, name = "Season") +
-      scale_y_continuous(limits = c(0,40), expand = c(0,0)) +
-      theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), legend.title = element_text(size = 14, face = "bold"), 
-            legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 10),
-            panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line())
-  })
 
 
   #Plot for download handler
   lablplot <- reactive({
     
-    ggplot(data = userdatalabline(), aes(x = Week, y = Percent_Pos, color = Season)) +
+    ggplot(data = userdatalabline(), aes(x = Week_Start, y = Percent_Pos, color = Season)) +
       geom_point(size = 3) + 
       geom_line(aes(group = Season), size = 1) +
-      labs(title = "Percent of Lab Specimens Positive for Influenza\n", x = "MMWR Week", y = "% of Positive Specimens") +
+      labs(title = "Percent of Lab Specimens Positive for Influenza\n", x = "MMWR Week Ending Date", y = "% of Positive Specimens") +
       scale_color_manual(values = groupcolorsperpos, name = "Season") +
       scale_y_continuous(limits = c(0,40), expand = c(0,0)) +
       theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), legend.title = element_text(size = 14, face = "bold"), 
-            legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 10),
-            panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line())
+            legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 12),
+            axis.text.x = element_text(angle = 70, hjust = 1), panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line())
+    
+  })
+  
+  #Plot for app display
+  output$lablineplot <- renderPlot({
+    
+    lablplot()
     
   })
   
@@ -405,7 +372,7 @@ server <- function(input, output) {
   #==========================================ICU HOSP (SERVER)=============================================================# 
   
   #See code comments from ED DATA BY SEASON
-  groupcolorsicu <- c("2015-16" = "#b5cde3", "2016-17" = "#376895", "2017-18" = "#C96E85")
+  groupcolorsicu <- c("2015-16" = "#b5cde3", "2016-17" = "#376895", "2017-18" = "#6b9bc7", "2018-19" = "#C96E85")
   
   userdataicu = reactive({
     return(icu[(icu$Season %in% input$icuseason), ]) 
@@ -416,14 +383,14 @@ server <- function(input, output) {
   #Plot for download handler
   icuprintplot <- reactive({
     
-    ggplot(userdataicu(), aes(x = Week, y = Count, fill = Season)) +
+    ggplot(userdataicu(), aes(x = Week_Start, y = Count, fill = Season)) +
       geom_col(position = "dodge") +
-      labs(title = "Number of Influenza-associated ICU Hospitalizations\n", x = "MMWR Week", y = "Count") +
+      labs(title = "Number of Influenza-associated ICU Hospitalizations\n", x = "MMWR Week Ending Date", y = "Count") +
       scale_fill_manual(values = groupcolorsicu, name = "Season") +
       scale_y_continuous(expand = c(0,0)) +
       theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), legend.title = element_text(size = 14, face = "bold"), 
-            legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 10),
-            panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line())
+            legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 12),
+            axis.text.x = element_text(angle = 70, hjust = 1), panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line())
     
     
   })
@@ -431,8 +398,7 @@ server <- function(input, output) {
   #Plot for app display
   output$icuplot <- renderPlot({
     
-    p2 <- icuprintplot()
-    print(p2)
+    icuprintplot()
     
   })
   
@@ -455,8 +421,9 @@ server <- function(input, output) {
   
   linepi <- c("Epidemic Threshold" = 1, "Baseline" = 3, "PI Death (Smoothed)" = 1)
   
-  #Plot for app display
-  output$piplot <- renderPlot({
+  
+  #Plot for download handler
+  piprintplot <- reactive({
     
     ggplot(data = pism, aes(x = Week, y = Percent, color = Value_Type)) +
       geom_line(aes(group = Value_Type, linetype = Value_Type), size = 1) +
@@ -474,21 +441,11 @@ server <- function(input, output) {
     
   })
   
-  #Plot for download handler
-  piprintplot <- reactive({
+  
+  #Plot for app display
+  output$piplot <- renderPlot({
     
-    ggplot(data = pism, aes(x = Week, y = Percent, color = Value_Type)) +
-      geom_line(aes(group = Value_Type, linetype = Value_Type), size = 1) +
-      labs(title = "Proportion of Deaths Associated with Pneumonia or Influenza\n", x = "MMWR Week", y = "P/I Mortality") +
-      scale_color_manual(values = colorpi, name = "") +
-      scale_linetype_manual(values = linepi, name = "") +
-      scale_y_continuous(limits = c(2,11), expand = c(0,0)) +
-      scale_x_discrete(breaks = c(40,50,10,20,30)) +
-      theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), legend.title = element_text(size = 14, face = "bold"), 
-            legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 10),
-            panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line(), 
-            strip.text.x = element_text(size = 12, face = "bold")) +
-      facet_grid(. ~ Season)
+    piprintplot()
     
     
   })

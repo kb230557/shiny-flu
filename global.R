@@ -3,7 +3,7 @@
 library("shiny")
 library("dplyr")
 library("ggplot2")
-library("Cairo")
+#library("Cairo")
 library("sp")
 library("leaflet")
 library("MMWRweek")
