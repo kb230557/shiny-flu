@@ -9,6 +9,9 @@ library("leaflet")
 library("MMWRweek")
 library("htmltools")
 library("DT")
+library("ggthemes")
+
+load("flu.Rdata")
 
 #Function so correct week will be automatically updated in risk assessment and map slider - retired after slider format changed to dates
 # getweek <- function (mydate) {

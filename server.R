@@ -1,6 +1,6 @@
 
 #Importing data
-load("flu.Rdata")
+#load("flu.Rdata")
 
 server <- function(input, output) {
   
@@ -26,28 +26,46 @@ server <- function(input, output) {
   
   #Assigning colors - used W3Schools color picker (https://www.w3schools.com/colors/colors_picker.asp) to select hues based off blue in border and logo (#6e9dc9)
   #Selected variation on red, yellow, and orange hues with higher saturation for brightness 
-  groupcolorsyr <- c("2010-11" = "#6ec9b2", "2011-12" = "#6ec96e", "2012-13" = "#6e6ec9", "2013-14" = "#dcdc5b",
-                     "2014-15" = "#c96eb2", "2015-16" = "#e69c51", "2016-17" = "#6E9DC9", "2017-18" = "#4cebeb", "2018-19" = "#eb4c4c")
-  
-  #Assigning line type (used vector assignment for easier adjustment in the future if needed)
-  grouplinesyr <- c("2010-11" = 1, "2011-12" = 1, "2012-13" = 1, "2013-14" = 1, 
-                    "2014-15" = 1, "2015-16" = 1, "2016-17" = 1, "2017-18" = 1, "2018-19" = 1)
+  # groupcolorsyr <- c("2010-11" = "#6ec9b2", "2011-12" = "#6ec96e", "2012-13" = "#6e6ec9", "2013-14" = "#dcdc5b",
+  #                    "2014-15" = "#c96eb2", "2015-16" = "#e69c51", "2016-17" = "#6E9DC9", "2017-18" = "#4cebeb", "2018-19" = "#1f77b4",
+  #                    "2019-20" = "#d62728",
+  #                    "Average H1N1 Seasons" = "#808080", "Average H3N2 Seasons" = "#D3D3D3", "Average All Seasons" = "#101010")
+  # 
+  # 
+  # #Assigning line type (used vector assignment for easier adjustment in the future if needed)
+  # grouplinesyr <- c("2010-11" = 1, "2011-12" = 1, "2012-13" = 1, "2013-14" = 1, 
+  #                   "2014-15" = 1, "2015-16" = 1, "2016-17" = 1, "2017-18" = 1, "2018-19" = 1,
+  #                   "Average H1N1 Seasons" = 5, "Average H3N2 Seasons" = 5, "Average All Seasons" = 5)
   
   
   #Creating plot of user-selected data to use in the download image function 
   edyrplot <- reactive({
     
-    ggplot(data = userdatayr(), aes(x = Week_Start, y = ED_ILI, color = Season)) +
-      geom_point(size = 3) + #######Consider size=4 paired with line size = 2 
+    p <- ggplot(data = userdatayr(), aes(x = Week_Start, y = ED_ILI, color = Season)) +
+      geom_point(size = 3) +  
       geom_line(aes(group = Season, linetype = Season), size = 1) +
-      geom_hline(yintercept = ifelse(input$baselinecheck, 1.06, -.1), color = "black", linetype = "F1") +
-      labs(title = "Proportion of ED Visits for ILI, Suburban Cook County\n", x = "MMWR Week Ending Date", y = "% of Visits for ILI") +
-      scale_color_manual(values = groupcolorsyr) +
-      scale_linetype_manual(values = grouplinesyr) +
-      scale_y_continuous(limits = c(0,7), expand = c(0,0)) +
+      geom_hline(yintercept = ifelse(input$baselinecheck, baseline_ess, -.1), color = "black", linetype = "F1") +
+      labs(title = "Proportion of ED Visits for ILI, Suburban Cook County\n", x = "MMWR Week Starting Date", y = "% of Visits for ILI") +
+      scale_y_continuous(limits = c(0,9), expand = c(0,0)) +
+      scale_x_discrete(drop = F) +
+      scale_linetype_manual(values = rep("solid", length(input$seasonpick))) +
       theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), legend.title = element_text(size = 14, face = "bold"), 
             legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 12),
             axis.text.x = element_text(angle = 70, hjust = 1), panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line())
+    
+    if(length(input$seasonpick) > 4){
+      
+      p + 
+        facet_wrap(~Season, ncol = 2) +
+        scale_color_manual(values = rep("#1f77b4", length(input$seasonpick))) 
+        
+        
+    } else {
+      
+      p + 
+        scale_color_manual(values = tableau_color_pal('Classic 10')(length(input$seasonpick))) 
+      
+    }
     
   })
   
@@ -110,9 +128,9 @@ server <- function(input, output) {
     return(fluedage[fluedage$Age_Group %in% input$agepick, ]) 
   })
   
-  groupcolorsage <- c("0-4" = "#6E9DC9", "5-17" = "#C96E85", "18-64" = "#6EC985", "65+" = "#C99C6E", "All" = "#979CA1")
+  groupcolorsage <- c("0-4" = "#1f77b4", "5-17" = "#ff7f0e", "18-44" = "#2ca02c", "45-64" = "#d62728", "65+" = "#9467bd", "All" = "#979CA1")
   
-  grouplinesage <- c("0-4" = 1, "5-17" = 1, "18-64" = 1, "65+" = 1, "All" = 5)
+  grouplinesage <- c("0-4" = 1, "5-17" = 1, "18-44" = 1, "45-64" = 1, "65+" = 1, "All" = 5)
 
   #Plot for download handler
   edageplot <- reactive({
@@ -120,10 +138,11 @@ server <- function(input, output) {
     ggplot(data = userdataage(), aes(x = Week_Start, y = ED_ILI, color = Age_Group)) +
       geom_point(size = 3) + 
       geom_line(aes(group = Age_Group, linetype = Age_Group), size = 1) +
-      labs(title = "Proportion of ED Visits for ILI by Age Group, Suburban Cook County\n", x = "MMWR Week Ending Date", y = "% of Visits for ILI") +
+      labs(title = "Proportion of ED Visits for ILI by Age Group, Suburban Cook County\n", x = "MMWR Week Starting Date", y = "% of Visits for ILI") +
       scale_color_manual(values = groupcolorsage, name = "Age Group") +
       scale_linetype_manual(values = grouplinesage, name = "Age Group") +
-      scale_y_continuous(limits = c(0,13), expand = c(0,0)) +
+      scale_y_continuous(limits = c(0,25), expand = c(0,0)) +
+      scale_x_discrete(drop = F)+
       theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), legend.title = element_text(size = 14, face = "bold"), 
             legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 12),
             axis.text.x = element_text(angle = 70, hjust = 1), panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line())
@@ -171,14 +190,18 @@ server <- function(input, output) {
   
   
   #Calculating MMWR week number from sliderinput selected date then translating to matching column position in zips data file
-  tempweek <- reactive ({
-    return(ifelse(MMWRweek(input$mapweek)[1,1] == 2018, MMWRweek(input$mapweek)[1,2] - 24, MMWRweek(input$mapweek)[1,2] + 28))
+  #tempweek <- reactive ({
+  #  return(ifelse(MMWRweek(input$mapweek)[1,1] == 2019, MMWRweek(input$mapweek)[1,2] - 24, MMWRweek(input$mapweek)[1,2] + 28))
+  #})
+  
+  tempweek <- reactive({
+    grep(paste0("^Week_", MMWRweek(as.Date(input$mapweek, format("%m-%d-%y")))[1,2], "$"), colnames(zips@data))
   })
   
   
   #Subsetting data to select only spatial data and selected week for ED values
   mapdata <- reactive ({
-    temp <- zips[,c(1:10, tempweek())]   #Subset spatial data plus selected week based on column position
+    temp <- zips[,c(1, tempweek())]   #Subset spatial data plus selected week based on column position
     names(temp) <- gsub("_.*","",names(temp))   #Renaming selected week to non-specific "Week" for use in later functions
     return(temp)                                #Returning data frame for use in global environment
   })
@@ -217,7 +240,11 @@ server <- function(input, output) {
   })
   
   #Creating the rest of the map in observer functions so it will be re-drawn as options change
-  observe ({
+  #observe ({
+    observeEvent({
+      input$mapweek
+      input$menu == "ED Data by Zip Code"
+    },{
     
     #Creating color palette
     bins <- c(0,1,2,4,6,8,10,Inf)
@@ -269,11 +296,12 @@ server <- function(input, output) {
   
   #See code comments from ED DATA BY SEASON section
   
+  
   #========BAR PLOT=======#
-  groupcolorslab <- c("A (H1N1)" = "#b5cde3", "A (H3N2)" = "#376895", "A (Unknown Subtype)" = "#6E9DC9", "B" = "#C96E85")
+  groupcolorslab <- c("A (H1N1)" = "#1f77b4", "A (H3N2)" = "#ff7f0e", "A (Unknown Subtype)" = "#2ca02c", "B" = "#d62728")
   
   userdatalabbar = reactive({
-      return(labcount[(labcount$Subtype %in% input$labbarstrain) & (labcount$Season == "2018-19"), ]) 
+      return(labcount[(labcount$Subtype %in% input$labbarstrain) & (labcount$Season == "2019-20"), ]) 
   })
   
   #NOTE: Explored hover functionality for bar plots but was unsuccessful, work on a solution at later date 
@@ -284,7 +312,7 @@ server <- function(input, output) {
     
     ggplot(userdatalabbar(), aes(x = Week_Start, y = Count, fill = Subtype)) +
       geom_col(position = input$labbartype) +
-      labs(title = "Number of Laboratory Specimens Positive for Influenza by Strain", x = "MMWR Week Ending Date", y = "Count") +
+      labs(title = "Number of Laboratory Specimens Positive for Influenza by Strain", x = "MMWR Week Starting Date", y = "Count") +
       scale_fill_manual(values = groupcolorslab, name = "Strain") +
       scale_y_continuous(expand = c(0,0)) +
       theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), legend.title = element_text(size = 14, face = "bold"), 
@@ -309,7 +337,7 @@ server <- function(input, output) {
   )
   
   #========LINE PLOT=======#
-  groupcolorsperpos <- c("2018-19" = "#C96E85", "2017-18" = "#376895", "2016-17" = "#6E9DC9","2015-16" = "#b5cde3")
+  groupcolorsperpos <- c("2019-20" = "#d62728", "2018-19"= "#91D1FF", "2017-18" = "#619FCC", "2016-17" = "#335E7C")
 
   userdatalabline = reactive({
     return(unique(labcount[labcount$Season %in% input$labpick,1:4])) 
@@ -323,9 +351,9 @@ server <- function(input, output) {
     ggplot(data = userdatalabline(), aes(x = Week_Start, y = Percent_Pos, color = Season)) +
       geom_point(size = 3) + 
       geom_line(aes(group = Season), size = 1) +
-      labs(title = "Percent of Lab Specimens Positive for Influenza\n", x = "MMWR Week Ending Date", y = "% of Positive Specimens") +
+      labs(title = "Percent of Lab Specimens Positive for Influenza\n", x = "MMWR Week Starting Date", y = "% of Positive Specimens") +
       scale_color_manual(values = groupcolorsperpos, name = "Season") +
-      scale_y_continuous(limits = c(0,40), expand = c(0,0)) +
+      scale_y_continuous(limits = c(0,45), expand = c(0,0)) +
       theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), legend.title = element_text(size = 14, face = "bold"), 
             legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 12),
             axis.text.x = element_text(angle = 70, hjust = 1), panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line())
@@ -370,9 +398,10 @@ server <- function(input, output) {
   
   
   #==========================================ICU HOSP (SERVER)=============================================================# 
-  
+
   #See code comments from ED DATA BY SEASON
-  groupcolorsicu <- c("2015-16" = "#b5cde3", "2016-17" = "#376895", "2017-18" = "#6b9bc7", "2018-19" = "#C96E85")
+  #groupcolorsicu <- c("2019-20" = "#C96E85", "2018-19"= "#376895", "2017-18" = "#6E9DC9", "2016-17" = "#b5cde3")
+  groupcolorsicu <- c("2019-20" = "#d62728", "2018-19"= "#91D1FF", "2017-18" = "#619FCC", "2016-17" = "#335E7C")
   
   userdataicu = reactive({
     return(icu[(icu$Season %in% input$icuseason), ]) 
@@ -385,9 +414,10 @@ server <- function(input, output) {
     
     ggplot(userdataicu(), aes(x = Week_Start, y = Count, fill = Season)) +
       geom_col(position = "dodge") +
-      labs(title = "Number of Influenza-associated ICU Hospitalizations\n", x = "MMWR Week Ending Date", y = "Count") +
+      labs(title = "Number of Influenza-associated ICU Hospitalizations\n", x = "MMWR Week Starting Date", y = "Count") +
       scale_fill_manual(values = groupcolorsicu, name = "Season") +
       scale_y_continuous(expand = c(0,0)) +
+      scale_x_discrete(drop = FALSE) +
       theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), legend.title = element_text(size = 14, face = "bold"), 
             legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 12),
             axis.text.x = element_text(angle = 70, hjust = 1), panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line())
@@ -411,13 +441,13 @@ server <- function(input, output) {
   
   
   #==========================================PI DEATH (SERVER)=============================================================#   
-  
+ 
   #========LINE PLOT=======#
   
   #Subsetting just smoothed data to use in plot
   pism <- pi[pi$Value_Type != "Actual", ]
   
-  colorpi <- c("Epidemic Threshold" = "#C96E85", "Baseline" = "#C96E85", "PI Death (Smoothed)" = "#6E9DC9")
+  colorpi <- c("Epidemic Threshold" = "#1f77b4", "Baseline" = "#1f77b4", "PI Death (Smoothed)" = "#d62728")
   
   linepi <- c("Epidemic Threshold" = 1, "Baseline" = 3, "PI Death (Smoothed)" = 1)
   
@@ -425,18 +455,18 @@ server <- function(input, output) {
   #Plot for download handler
   piprintplot <- reactive({
     
-    ggplot(data = pism, aes(x = Week, y = Percent, color = Value_Type)) +
+    ggplot(data = pism, aes(x = date_ish, y = Percent, color = Value_Type)) +
       geom_line(aes(group = Value_Type, linetype = Value_Type), size = 1) +
-      labs(title = "Proportion of Deaths Associated with Pneumonia or Influenza\n", x = "MMWR Week", y = "P/I Mortality") +
+      labs(title = "Proportion of Deaths Associated with Pneumonia or Influenza\n", x = "Date", y = "% of Deaths due to Pneumonia/Flu") +
       scale_color_manual(values = colorpi, name = "") +
       scale_linetype_manual(values = linepi, name = "") +
       scale_y_continuous(limits = c(2,11), expand = c(0,0)) +
-      scale_x_discrete(breaks = c(40,50,10,20,30)) +
+      scale_x_date(date_breaks = "3 month", date_labels =  "%b %Y") +
       theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), legend.title = element_text(size = 14, face = "bold"), 
-            legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 10),
-            panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line(), 
+            legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 14),
+            panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line(), axis.text.x = element_text(angle = 70, hjust = 1),
             strip.text.x = element_text(size = 12, face = "bold")) +
-      facet_grid(. ~ Season)
+      facet_grid(. ~ Season, scales = "free_x")
     
     
   })
@@ -453,7 +483,7 @@ server <- function(input, output) {
   output$downloadpi <- downloadHandler(
     filename = "PI_Mort_Smooth.png",
     content = function(pifile){
-      ggsave(pifile, plot = piprintplot(), device = "png", height = 3, width = 10, unit = "in")
+      ggsave(pifile, plot = piprintplot(), device = "png", height = 5, width = 10, unit = "in")
     }
   )
   
@@ -488,17 +518,17 @@ server <- function(input, output) {
   
   #========DATA TABLE=======#
 
-  #Subsetting data from user inputs
-  piselect = reactive({
-    return(pi[pi$Season == input$piyear & pi$Value_Type == "Actual", c(2,1,4)]) 
-  })
-  
-  #Creating data table
-  output$pitable <- DT::renderDataTable({ 
-    
-    piselect() 
-    
-    })
+  # #Subsetting data from user inputs
+  # piselect = reactive({
+  #   return(pi[pi$Season == input$piyear & pi$Value_Type == "Actual", c(2,1,4)]) 
+  # })
+  # 
+  # #Creating data table
+  # output$pitable <- DT::renderDataTable({ 
+  #   
+  #   piselect() 
+  #   
+  #   })
   
   
 }#Server function closure
