@@ -90,18 +90,13 @@ ui <- fluidPage(
       
           checkboxGroupInput(inputId = "seasonpick", #inputID is used in server function to subset user-selected data 
                          label = "Display ED Data by Season for Suburban Cook County", 
-                         choiceNames = list("2019-20", "Average of All Seasons Since 2010", "Average of H1N1 Seasons", "Average of H3N2 Seasons", 
-                                             "2018-19 (H1N1 Predominant)",
-                                            "2017-18 (H3N2 Predominant)", "2016-17 (H3N2 Predominant)", "2015-16 (H1N1 Predominant)", 
-                                            "2014-15 (H3N2 Predominant)*","2013-14 (H1N1 Predominant)","2012-13 (H3N2 Predominant)",
-                                            "2011-12 (H3N2 Predominant)", "2010-11 (Mixed Strain Predominant)"),
-                         choiceValues = list("2019-20", "Average All Seasons", "Average H1N1 Seasons", "Average H3N2 Seasons", "2018-19", "2017-18",
-                                             "2016-17", "2015-16", "2014-15", "2013-14", "2012-13", "2011-12", "2010-11"),
-                         selected = "2019-20"),
+                         choiceNames = c(as.character(year_strains), paste("COVID-like Illness,", season_name)),
+                         choiceValues = c(names(year_strains), "COVID-like Illness"),
+                         selected = c(season_name, "COVID-like Illness")),
       
-          p("Include the 2018-19 Baseline?", tags$sup(HTML('&#167'), style = "font-weight: normal"), style = "font-weight: bold"),
+          p("Include ILI Baseline?", tags$sup(HTML('&#167'), style = "font-weight: normal"), style = "font-weight: bold"),
       
-          checkboxInput(inputId = "baselinecheck", label = "2019-20 Baseline", value = TRUE),
+          checkboxInput(inputId = "baselinecheck", label = "ILI Baseline", value = TRUE),
           
       #Adding footnotes  
           tags$div(tags$small("* Influenza surveillance data are aggregated by MMWR week. Most years have 52 weeks; however some have 53 weeks. 
@@ -258,8 +253,8 @@ ui <- fluidPage(
               
               checkboxGroupInput(inputId = "labpick", 
                                  label = "Display the Percent of Specimens Testing Positive for Influenza", 
-                                 choices = list("2016-17", "2017-18", "2018-19", "2019-20"),
-                                 selected = "2019-20") 
+                                 choices = names(year_strains),
+                                 selected = season_name) 
               
             ),#lab line chart sidebarpanel closure
             
@@ -298,18 +293,16 @@ tabPanel("ICU Hospitalizations", id = "ICU",
              
              checkboxGroupInput(inputId = "icuseason", 
                                 label = "Display ICU Hospitalizations by Season:", 
-                                choiceNames = list( "2016-17 (H3N2 Predominant)", "2017-18 (H3N2 Predominant)", "2018-19 (H1N1 Predominant)",
-                                                   "2019-20"), 
-                                choiceValues = list("2016-17","2017-18", "2018-19", "2019-20"),
-                                selected = "2019-20")
+                                choiceNames = as.character(year_strains), 
+                                choiceValues = names(year_strains),
+                                selected = season_name)
              
            ),#icu sidebarpanel closure
            
            mainPanel(
              
-             plotOutput("icuplot"),  
+             uiOutput("icu_cases_ui")
              
-             downloadButton('downloadicu', 'Download Image')
            )#icu mainpanel closure
          )#icu sidebarlayout closure
       ),#icu tab closure

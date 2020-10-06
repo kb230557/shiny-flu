@@ -340,7 +340,7 @@ server <- function(input, output) {
   groupcolorsperpos <- c("2019-20" = "#d62728", "2018-19"= "#91D1FF", "2017-18" = "#619FCC", "2016-17" = "#335E7C")
 
   userdatalabline = reactive({
-    return(unique(labcount[labcount$Season %in% input$labpick,1:4])) 
+    return(unique(labcount[labcount$Season %in% input$labpick,])) 
   })
   
 
@@ -352,7 +352,8 @@ server <- function(input, output) {
       geom_point(size = 3) + 
       geom_line(aes(group = Season), size = 1) +
       labs(title = "Percent of Lab Specimens Positive for Influenza\n", x = "MMWR Week Starting Date", y = "% of Positive Specimens") +
-      scale_color_manual(values = groupcolorsperpos, name = "Season") +
+      #scale_color_manual(values = groupcolorsperpos, name = "Season") +
+      scale_color_tableau(name = "Season") +
       scale_y_continuous(limits = c(0,45), expand = c(0,0)) +
       theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), legend.title = element_text(size = 14, face = "bold"), 
             legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 12),
@@ -398,46 +399,52 @@ server <- function(input, output) {
   
   
   #==========================================ICU HOSP (SERVER)=============================================================# 
-
-  #See code comments from ED DATA BY SEASON
-  #groupcolorsicu <- c("2019-20" = "#C96E85", "2018-19"= "#376895", "2017-18" = "#6E9DC9", "2016-17" = "#b5cde3")
-  groupcolorsicu <- c("2019-20" = "#d62728", "2018-19"= "#91D1FF", "2017-18" = "#619FCC", "2016-17" = "#335E7C")
+  #number of rows for plot
+  plot_rows = reactive({
+    ceiling(length(input$icuseason)/2)
+    
+  }) 
   
-  userdataicu = reactive({
-    return(icu[(icu$Season %in% input$icuseason), ]) 
+  
+  #cases by year bar/line plots
+  output$icu_cases_plot <- renderPlotly({
+    #cases_plot
+    
+    plot_years = input$icuseason
+    plot_data = final_icu %>%
+      filter(season %in% plot_years) %>%
+      rename(Week = weekStarts,
+             Cases = n
+             ) %>%
+      group_by(season) %>%
+      complete(Week, fill = list(n = NA))
+    
+    p<- ggplot(data=plot_data, aes(x=Week, y=Cases,group=season, fill ="")) + #, fill =season -- add if want dif colors
+      geom_bar(stat = "identity")+
+      scale_fill_tableau()+
+      expand_limits(y = 4) +
+      facet_wrap(~season, nrow = plot_rows()) +
+      theme(axis.text.x = element_text(angle = 90,color=rep(c("black","transparent"),11),
+                                       size = 8),
+            panel.grid.major.x = element_blank(),
+            panel.grid.minor.x = element_blank(),
+            panel.background = element_rect(fill = "white", colour = "grey50"),
+            panel.grid.major = element_line(colour = "grey80"),
+            plot.margin = margin(t=10,r=10,b=10,l=50),
+            panel.spacing = unit(0.5, "lines")
+      ) +
+      xlab("") +
+      ylab("Influenza ICU Cases") 
+    
+    ggplotly(p,  tooltip=c("x", "y")) %>%
+      layout(showlegend = FALSE,
+             hovermode = "compare") 
+    
   })
   
-  #See note in lab bar plot section on hover functionality
-  
-  #Plot for download handler
-  icuprintplot <- reactive({
-    
-    ggplot(userdataicu(), aes(x = Week_Start, y = Count, fill = Season)) +
-      geom_col(position = "dodge") +
-      labs(title = "Number of Influenza-associated ICU Hospitalizations\n", x = "MMWR Week Starting Date", y = "Count") +
-      scale_fill_manual(values = groupcolorsicu, name = "Season") +
-      scale_y_continuous(expand = c(0,0)) +
-      scale_x_discrete(drop = FALSE) +
-      theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), legend.title = element_text(size = 14, face = "bold"), 
-            legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 12),
-            axis.text.x = element_text(angle = 70, hjust = 1), panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line())
-    
-    
+  output$icu_cases_ui <- renderUI({
+    plotlyOutput("icu_cases_plot", height = (plot_rows()*250))
   })
-  
-  #Plot for app display
-  output$icuplot <- renderPlot({
-    
-    icuprintplot()
-    
-  })
-  
-  output$downloadicu <- downloadHandler(
-    filename = "Flu_ICU_by_Season.png",
-    content = function(icufile){
-      ggsave(icufile, plot = icuprintplot(), device = "png", height = 3, width = 10, unit = "in")
-    }
-  )
   
   
   #==========================================PI DEATH (SERVER)=============================================================#   

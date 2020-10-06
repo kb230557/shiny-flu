@@ -10,8 +10,23 @@ library("MMWRweek")
 library("htmltools")
 library("DT")
 library("ggthemes")
+library("plotly")
+library("tidyverse")
+library("magrittr")
 
 load("flu.Rdata")
+pi = pic_clean
+icu = final_icu
+
+season_name = "2020-21"
+
+year_strains =  c("2020-21" = "2020-21",
+                  "2019-20" = "2019-20 (Mixed Strain Predominant)",
+                  "2018-19" = "2018-19 (H1N1 Predominant)",
+                  "2017-18" = "2017-18 (H3N2 Predominant)",
+                  "2016-17" = "2016-17 (H3N2 Predominant)",
+                  "2015-16" = "2015-16 (H1N1 Predominant)"
+                  )
 
 #Function so correct week will be automatically updated in risk assessment and map slider - retired after slider format changed to dates
 # getweek <- function (mydate) {
