@@ -348,58 +348,6 @@ server <- function(input, output) {
   
 
 
-  #Plot for download handler
-  lablplot <- reactive({
-    
-    
-    ggplot(data = userdatalabline(), aes(x = Week_Start, y = Percent_Pos, color = Season)) +
-      geom_point(size = 3) + 
-      geom_line(aes(group = Season), size = 1) +
-      labs(title = "Percent of Lab Specimens Positive for Influenza\n", x = "MMWR Week Starting Date", y = "% of Positive Specimens") +
-      #scale_color_manual(values = groupcolorsperpos, name = "Season") +
-      scale_color_tableau(name = "Season") +
-      scale_y_continuous(limits = c(0,45), expand = c(0,0)) +
-      theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), legend.title = element_text(size = 14, face = "bold"), 
-            legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 12),
-            axis.text.x = element_text(angle = 70, hjust = 1), panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line())
-    
-  })
-  
-  #Plot for app display
-  output$lablineplot <- renderPlot({
-    
-    lablplot()
-    
-  })
-  
-  output$downloadlabline <- downloadHandler(
-    filename = "Lab_Data_by_Season.png",
-    content = function(lablinefile){
-      ggsave(lablinefile, plot = lablplot(), device = "png", height = 3, width = 10, unit = "in")
-    }
-  )
-  
-  output$hover_info_labline <- renderUI({
-    
-    hover <- input$plot_hover_labline
-    point <- nearPoints(userdatalabline(), hover, threshold = 5, maxpoints = 1, addDist = TRUE)
-    if (nrow(point) == 0) return(NULL)
-    
-    left_pct <- (hover$x - hover$domain$left) / (hover$domain$right - hover$domain$left)
-    top_pct <- (hover$domain$top - hover$y) / (hover$domain$top - hover$domain$bottom)
-    
-    left_px <- hover$range$left + left_pct * (hover$range$right - hover$range$left)
-    top_px <- hover$range$top + top_pct * (hover$range$bottom - hover$range$top)
-    
-    style <- paste0("position:absolute; z-index:100; background-color: rgba(245, 245, 245, 0.85); ",
-                    "left:", left_px + 2, "px; top:", top_px + 2, "px;")
-    wellPanel(
-      style = style,
-      p(HTML(paste0("<b> Season: </b>", point$Season, "<br/>",
-                    "<b> MMWR Week: </b>", point$Week, "<br/>",
-                    "<b> % Positive: </b>", round(point$Percent_Pos, 2), "<br/>")))
-    )
-  })
   
   
   #==========================================ICU HOSP (SERVER)=============================================================# 
@@ -497,81 +445,7 @@ server <- function(input, output) {
     
   })
   
-  
-  
-  
-  
-  # #Subsetting just smoothed data to use in plot
-  # pism <- pi[pi$Value_Type != "Actual", ]
-  # 
-  # colorpi <- c("Epidemic Threshold" = "#1f77b4", "Baseline" = "#1f77b4", "PI Death (Smoothed)" = "#d62728")
-  # 
-  # linepi <- c("Epidemic Threshold" = 1, "Baseline" = 3, "PI Death (Smoothed)" = 1)
-  # 
-  # 
-  # #Plot for download handler
-  # piprintplot <- reactive({
-  #   
-  #   ggplot(data = pism, aes(x = date_ish, y = Percent, color = Value_Type)) +
-  #     geom_line(aes(group = Value_Type, linetype = Value_Type), size = 1) +
-  #     labs(title = "Proportion of Deaths Associated with Pneumonia or Influenza\n", x = "Date", y = "% of Deaths due to Pneumonia/Flu") +
-  #     scale_color_manual(values = colorpi, name = "") +
-  #     scale_linetype_manual(values = linepi, name = "") +
-  #     scale_y_continuous(limits = c(2,11), expand = c(0,0)) +
-  #     scale_x_date(date_breaks = "3 month", date_labels =  "%b %Y") +
-  #     theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), legend.title = element_text(size = 14, face = "bold"), 
-  #           legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 14),
-  #           panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line(), axis.text.x = element_text(angle = 70, hjust = 1),
-  #           strip.text.x = element_text(size = 12, face = "bold")) +
-  #     facet_grid(. ~ Season, scales = "free_x")
-  #   
-  #   
-  # })
-  # 
-  # 
-  # #Plot for app display
-  # output$piplot <- renderPlot({
-  #   
-  #   piprintplot()
-  #   
-  #   
-  # })
-  # 
-  # output$downloadpi <- downloadHandler(
-  #   filename = "PI_Mort_Smooth.png",
-  #   content = function(pifile){
-  #     ggsave(pifile, plot = piprintplot(), device = "png", height = 5, width = 10, unit = "in")
-  #   }
-  # )
-  # 
-  # output$hover_info_pi <- renderUI({
-  #   
-  #   hover <- input$plot_hover_pi
-  #   point <- nearPoints(pism, hover, threshold = 5, maxpoints = 1, addDist = TRUE)
-  #   if (nrow(point) == 0) return(NULL)
-  #   
-  #   # calculate point position INSIDE the image as percent of total dimensions
-  #   # from left (horizontal) and from top (vertical)
-  #   left_pct <- (hover$x - hover$domain$left) / (hover$domain$right - hover$domain$left)
-  #   top_pct <- (hover$domain$top - hover$y) / (hover$domain$top - hover$domain$bottom)
-  #   
-  #   # calculate distance from left and bottom side of the picture in pixels
-  #   left_px <- hover$range$left + left_pct * (hover$range$right - hover$range$left)
-  #   top_px <- hover$range$top + top_pct * (hover$range$bottom - hover$range$top)
-  #   
-  #   # create style property fot tooltip
-  #   # background color is set so tooltip is a bit transparent
-  #   # z-index is set so we are sure are tooltip will be on top
-  #   style <- paste0("position:absolute; z-index:100; background-color: rgba(245, 245, 245, 0.85); ",
-  #                   "left:", left_px + 2, "px; top:", top_px + 2, "px;")
-  #   
-  #   # actual tooltip created as wellPanel
-  #   wellPanel(
-  #     style = style,
-  #     p(HTML(paste0("<b> Value: </b>", point$Value_Type, "<br/>",
-  #                   "<b> Proportion: </b>", point$Percent, "<br/>")))
-  #   )
-  # })
+
   
   #========DATA TABLE=======#
 
