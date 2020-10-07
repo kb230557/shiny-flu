@@ -15,8 +15,7 @@ library("tidyverse")
 library("magrittr")
 
 load("flu.Rdata")
-pi = pic_clean
-icu = final_icu
+
 
 season_name = "2020-21"
 

@@ -113,16 +113,7 @@ ui <- fluidPage(
     
     #Building main panel with plot and download functionality
        mainPanel(
-          div(  #Mirroring code from hover code credit in server function
-            style = "position:relative", #Mirroring code from code credit
-            
-            #Displays plot from server function and stores mouse data when user hovers over point
-            plotOutput("seasonplot", hover = hoverOpts("plot_hover_season", delay = 100, delayType = "debounce")), 
-            
-            uiOutput("hover_info_season"), #Displays values from server function to select data for hovered-over point
-            
-            downloadButton('downloadseason', 'Download Image')
-          )
+          plotlyOutput("edyr_plotly")
         )#ED season mainpanel closure
       ),#ED season sidebarlayout closure
   
@@ -146,15 +137,8 @@ ui <- fluidPage(
         ),#ED Age sidebarpanel closure
     
         mainPanel(
-          div(  
-            style = "position:relative", 
-            
-            plotOutput("ageplot", hover = hoverOpts("plot_hover_age", delay = 100, delayType = "debounce")),
-            
-            uiOutput("hover_info_age"), 
-            
-            downloadButton('downloadage', 'Download Image')
-          )
+          plotlyOutput("edage_plotly")
+          
         )#ED Age mainpanel closure
     
        )#ED Age sidebarlayout closure
@@ -223,7 +207,7 @@ ui <- fluidPage(
                  radioButtons(inputId = "labbartype", 
                                     label = "Choose type of bar graph:", 
                                     choiceNames = list("Stacked ", "Side-by-Side"), 
-                                    choiceValues = list("stack", "dodge"),
+                                    choiceValues = list("stack", "group"),
                                     selected = "stack"),
                                     #selected = "dodge"),
                  
@@ -238,9 +222,8 @@ ui <- fluidPage(
                
              mainPanel(
                
-                   plotOutput("labbarplot"), 
+                   plotlyOutput("lab_strains_plotly")
                    
-                   downloadButton('downloadlabbar', 'Download Image')
              )#lab bar chart mainpanel closure
           ),#lab bar chart sidebarlayout closure
       
@@ -259,15 +242,9 @@ ui <- fluidPage(
             ),#lab line chart sidebarpanel closure
             
             mainPanel(
-              div(  
-                style = "position:relative", 
-                
-                plotOutput("lablineplot", hover = hoverOpts("plot_hover_labline", delay = 100, delayType = "debounce")),
-                
-                uiOutput("hover_info_labline"), 
-                
-                downloadButton('downloadlabline', 'Download Image')
-              )
+              
+              plotlyOutput("lab_percent_plotly")
+              
             )#lab line chart  mainpanel closure
             
           )#lab line chart sidebarlayout closure
@@ -335,15 +312,9 @@ tabPanel("Mortality", id = "PI",
              ),#pi sidebarpanel closure 1
            
            mainPanel(
-             div(  
-               style = "position:relative", 
-               
-               plotOutput("piplot", hover = hoverOpts("plot_hover_pi", delay = 100, delayType = "debounce")), 
-               
-               uiOutput("hover_info_pi"), 
-               
-               downloadButton('downloadpi', 'Download Image'), br(), br(), br()
-              )
+             
+             plotlyOutput("pic_plot", height = 400)
+             
             )#pi mainpanel closure 1
            ) #,#pi sidebarlayout closure 1
 

@@ -13,179 +13,125 @@ server <- function(input, output) {
   
   #Subsetting data to plot based on user selected seasons
   userdatayr = reactive({
-    return(fluedyr[fluedyr$Season %in% input$seasonpick, ]) #inputID is from UI script - ensures user-selected data is displayed
+
+    fluedyr %>%
+      filter(Season %in% input$seasonpick) %>%
+      group_by(Season) %>%
+      complete(Week_Start) %>%
+      mutate(ED_ILI = round(ED_ILI, 2))
+    
   })
   
-  #Attempted to merge season data with baseline data so hover option would work on baseline data but code didn't work, retained for possible further troubleshooting
-  # hoverdata = reactive({
-  #   if(input$baselinecheck) {
-  #     rbind(userdata(),testdf)
-  #   }
-  #   else return(userdata())
-  # })
-  
-  #Assigning colors - used W3Schools color picker (https://www.w3schools.com/colors/colors_picker.asp) to select hues based off blue in border and logo (#6e9dc9)
-  #Selected variation on red, yellow, and orange hues with higher saturation for brightness 
-  # groupcolorsyr <- c("2010-11" = "#6ec9b2", "2011-12" = "#6ec96e", "2012-13" = "#6e6ec9", "2013-14" = "#dcdc5b",
-  #                    "2014-15" = "#c96eb2", "2015-16" = "#e69c51", "2016-17" = "#6E9DC9", "2017-18" = "#4cebeb", "2018-19" = "#1f77b4",
-  #                    "2019-20" = "#d62728",
-  #                    "Average H1N1 Seasons" = "#808080", "Average H3N2 Seasons" = "#D3D3D3", "Average All Seasons" = "#101010")
-  # 
-  # 
-  # #Assigning line type (used vector assignment for easier adjustment in the future if needed)
-  # grouplinesyr <- c("2010-11" = 1, "2011-12" = 1, "2012-13" = 1, "2013-14" = 1, 
-  #                   "2014-15" = 1, "2015-16" = 1, "2016-17" = 1, "2017-18" = 1, "2018-19" = 1,
-  #                   "Average H1N1 Seasons" = 5, "Average H3N2 Seasons" = 5, "Average All Seasons" = 5)
-  
-  
-  #Creating plot of user-selected data to use in the download image function 
-  edyrplot <- reactive({
+  #plotly
+  output$edyr_plotly = renderPlotly({
     
-    p <- ggplot(data = userdatayr(), aes(x = Week_Start, y = ED_ILI, color = Season)) +
-      geom_point(size = 3) +  
-      geom_line(aes(group = Season, linetype = Season), size = 1) +
-      geom_hline(yintercept = ifelse(input$baselinecheck, baseline_ess, -.1), color = "black", linetype = "F1") +
-      labs(title = "Proportion of ED Visits for ILI, Suburban Cook County\n", x = "MMWR Week Starting Date", y = "% of Visits for ILI") +
-      scale_y_continuous(limits = c(0,9), expand = c(0,0)) +
-      scale_x_discrete(drop = F) +
-      scale_linetype_manual(values = rep("solid", length(input$seasonpick))) +
-      theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), legend.title = element_text(size = 14, face = "bold"), 
-            legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 12),
-            axis.text.x = element_text(angle = 70, hjust = 1), panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line())
+    #Set color pal
+    pal = tableau_color_pal()(length(unique(fluedyr$Season)))
+    names(pal) = unique(fluedyr$Season)
     
-    if(length(input$seasonpick) > 4){
-      
-      p + 
-        facet_wrap(~Season, ncol = 2) +
-        scale_color_manual(values = rep("#1f77b4", length(input$seasonpick))) 
-        
-        
-    } else {
-      
-      p + 
-        scale_color_manual(values = tableau_color_pal('Classic 10')(length(input$seasonpick))) 
-      
+    #Set axis mins and maxs
+    minx = min(userdatayr()$Week_Start)
+    maxx = max(userdatayr()$Week_Start)
+    miny = 0
+    maxy = ceiling(max(userdatayr()$ED_ILI, na.rm = T))
+    
+    #Legend title annotation
+    legendtitle = list(yref='paper',xref="paper",y=1.05,x=1.09, text="<b>Season</b>",showarrow=F)
+    
+    #plot
+    plot = plot_ly(data = userdatayr(), x = ~Week_Start, y = ~ED_ILI, color = ~Season, 
+            colors = pal, hovertemplate = paste('%{y}'),
+            line = list(width = 3),
+            type = "scatter", mode = "lines") %>%
+      layout(hovermode = "compare",
+             xaxis = list(title = "Week", showgrid = F, range = c(minx, maxx), showline = T),
+             yaxis = list(title = "% of Visits", showgrid = F, range = c(miny, maxy), showline = T),
+             title = "Proportion of ED Visits for ILI, Suburban Cook County",
+             annotations=legendtitle,
+             margin = list(r=25,l=50,t=50,b=0),
+             showlegend = T
+             
+             )
+    
+    #add baseline check if selected
+    if(input$baselinecheck){
+      plot %<>%
+        add_segments(x = minx, xend = maxx, y = baseline_ess, yend = baseline_ess, type = "line",
+                     color = "baseline", line = list(color = "black", dash = "dot", width = 1), 
+                     name = "ILI Baseline")
     }
     
-  })
-  
-  
-  #Creating plot of user-selected data to display on the app 
-  output$seasonplot <- renderPlot({
-    
-    edyrplot()
+    #plot
+    plot
+
     
   })
   
-  #Creating download image functionality
-  output$downloadseason <- downloadHandler(
-    filename = "ED_Data_by_Season.png",
-    content = function(edyrfile){
-      ggsave(edyrfile, plot = edyrplot(), device = "png", height = 3, width = 10, unit = "in")
-    }
-  )
-  
-  #Generating tooltip data for hovered-over points #######CODE CREDIT: http://www.77dev.com/2016/03/custom-interactive-csshtml-tooltips.html
-  output$hover_info_season <- renderUI({
-    
-    if(!is.null(input$seasonpick)) { #Line added to avoid error caused by geom_hline in plot when no values are selected
-      
-      hover <- input$plot_hover_season
-      point <- nearPoints(userdatayr(), hover, threshold = 5, maxpoints = 1, addDist = TRUE)
-      if (nrow(point) == 0) return(NULL)
-      
-      # calculate point position INSIDE the image as percent of total dimensions
-      # from left (horizontal) and from top (vertical)
-      left_pct <- (hover$x - hover$domain$left) / (hover$domain$right - hover$domain$left)
-      top_pct <- (hover$domain$top - hover$y) / (hover$domain$top - hover$domain$bottom)
-      
-      # calculate distance from left and bottom side of the picture in pixels
-      left_px <- hover$range$left + left_pct * (hover$range$right - hover$range$left)
-      top_px <- hover$range$top + top_pct * (hover$range$bottom - hover$range$top)
-      
-      # create style property fot tooltip
-      # background color is set so tooltip is a bit transparent
-      # z-index is set so we are sure are tooltip will be on top
-      style <- paste0("position:absolute; z-index:100; background-color: rgba(245, 245, 245, 0.85); ",
-                      "left:", left_px + 2, "px; top:", top_px + 2, "px;")
-      
-      # actual tooltip created as wellPanel
-      wellPanel(
-        style = style,
-        p(HTML(paste0("<b> Season: </b>", point$Season, "<br/>",
-                      "<b> MMWR Week: </b>", point$CDC_Week, "<br/>",
-                      "<b> % of ED Visits for ILI: </b>", point$ED_ILI, "<br/>")))
-      )
-      
-    }
-  })
   
   
   #==========================================ED DATA BY AGE (SERVER)=============================================================#
  
-  #See code comments above
+  #Filter data to selected
   userdataage = reactive({
-    return(fluedage[fluedage$Age_Group %in% input$agepick, ]) 
-  })
-  
-  groupcolorsage <- c("0-4" = "#1f77b4", "5-17" = "#ff7f0e", "18-44" = "#2ca02c", "45-64" = "#d62728", "65+" = "#9467bd", "All" = "#979CA1")
-  
-  grouplinesage <- c("0-4" = 1, "5-17" = 1, "18-44" = 1, "45-64" = 1, "65+" = 1, "All" = 5)
 
-  #Plot for download handler
-  edageplot <- reactive({
-    
-    ggplot(data = userdataage(), aes(x = Week_Start, y = ED_ILI, color = Age_Group)) +
-      geom_point(size = 3) + 
-      geom_line(aes(group = Age_Group, linetype = Age_Group), size = 1) +
-      labs(title = "Proportion of ED Visits for ILI by Age Group, Suburban Cook County\n", x = "MMWR Week Starting Date", y = "% of Visits for ILI") +
-      scale_color_manual(values = groupcolorsage, name = "Age Group") +
-      scale_linetype_manual(values = grouplinesage, name = "Age Group") +
-      scale_y_continuous(limits = c(0,25), expand = c(0,0)) +
-      scale_x_discrete(drop = F)+
-      theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), legend.title = element_text(size = 14, face = "bold"), 
-            legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 12),
-            axis.text.x = element_text(angle = 70, hjust = 1), panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line())
-    
+    fluedage %>%
+      filter(Age_Group %in% input$agepick) %>%
+      group_by(Age_Group) %>%
+      complete(Week_Start) %>%
+      mutate(ED_ILI = round(ED_ILI, 2)) %>%
+      ungroup() %>%
+      mutate(Age_Group = factor(Age_Group, 
+                                levels = c("0-4", "5-17", "18-44", "45-64", "65+", "All")
+                                )
+             )
   })
   
-  #Plot for app display
-  output$ageplot <- renderPlot({
-    
-    edageplot()
-    
-  })
   
-  output$downloadage <- downloadHandler(
-    filename = "ED_Data_by_Age.png",
-    content = function(edagefile){
-      ggsave(edagefile, plot = edageplot(), device = "png", height = 3, width = 10, unit = "in")
-    }
-  )
   
-  output$hover_info_age <- renderUI({
-      
-      hover <- input$plot_hover_age
-      point <- nearPoints(userdataage(), hover, threshold = 5, maxpoints = 1, addDist = TRUE)
-      if (nrow(point) == 0) return(NULL)
-      
-      left_pct <- (hover$x - hover$domain$left) / (hover$domain$right - hover$domain$left)
-      top_pct <- (hover$domain$top - hover$y) / (hover$domain$top - hover$domain$bottom)
-      
-      left_px <- hover$range$left + left_pct * (hover$range$right - hover$range$left)
-      top_px <- hover$range$top + top_pct * (hover$range$bottom - hover$range$top)
-      
-      style <- paste0("position:absolute; z-index:100; background-color: rgba(245, 245, 245, 0.85); ",
-                      "left:", left_px + 2, "px; top:", top_px + 2, "px;")
-      wellPanel(
-        style = style,
-        p(HTML(paste0("<b> Age Group: </b>", point$Age_Group, "<br/>",
-                      "<b> MMWR Week: </b>", point$Week_Number, "<br/>",
-                      "<b> % of ED Visits for ILI: </b>", point$ED_ILI, "<br/>")))
+  output$edage_plotly = renderPlotly({
+    
+    #Set color pallette and line types
+    pal = c(tableau_color_pal(palette = "Tableau 20")(5), "#7f7f7f")
+    names(pal) = unique(fluedage$Age_Group)
+    #pal = c("0-4" = "#1f77b4", "5-17" = "#ff7f0e", "18-44" = "#2ca02c", "45-64" = "#d62728", "65+" = "#9467bd", "All" = "#979CA1") #old pal
+    
+    
+    lines = c(rep("solid",5), "dash")
+    names(lines) = unique(fluedage$Age_Group)
+    
+    
+    #Set min and max axis values
+    minx = min(userdataage()$Week_Start)
+    maxx = max(userdataage()$Week_Start)
+    miny = 0
+    maxy = ceiling(max(userdataage()$ED_ILI, na.rm = T))
+    
+    #Legend Titile
+    legendtitle = list(yref='paper',xref="paper",y=1.05,x=1.11, text="<b>Age Group</b>",showarrow=F)
+    
+    #plot
+    plot_ly(data = userdataage(), x = ~Week_Start, y = ~ED_ILI, color = ~Age_Group, 
+                   colors = pal, hovertemplate = paste('%{y}'), linetype = ~Age_Group,
+                   linetypes = lines,
+                   line = list(width = 3),
+                   type = "scatter", mode = "lines") %>%
+      layout(hovermode = "compare",
+             xaxis = list(title = "Week", showgrid = F, range = c(minx, maxx), showline = T),
+             yaxis = list(title = "% of Visits for ILI", showgrid = F, range = c(miny, maxy), showline = T),
+             title = "Proportion of ED Visits for ILI by Age Group, Suburban Cook County",
+             annotations=legendtitle,
+             margin = list(r=0,l=50,t=50,b=0),
+             showlegend = T
+             
       )
+    
+    
+    
   })
-   
   
+
+  
+
   #==========================================ED MAP DATA (SERVER)=============================================================#
   
   
@@ -215,7 +161,7 @@ server <- function(input, output) {
   #Generating the base map so it doesn't need to be redrawn with each change 
   output$EDmap <- renderLeaflet({
     
-    leaflet(zips) %>% addProviderTiles(providers$CartoDB.Positron) %>% setView(lng = -87.86, lat = 41.8, zoom = 10) 
+    leaflet(zips, options = leafletOptions(minZoom = 8, zoomSnap = .25)) %>% addProviderTiles(providers$CartoDB.Positron) %>% setView(lng = -87.86, lat = 41.8, zoom = 9.75) 
     
     #NOTE: Placing all polygon layers in an observer functions results in the map intializing with no layer. However, intializing with Week 35 polygons results in 
     #Week 35 flashing between each week on animation. Still need a solution here...Empty polygon borders?
@@ -298,55 +244,113 @@ server <- function(input, output) {
   
   
   #========BAR PLOT=======#
-  groupcolorslab <- c("A (H1N1)" = "#1f77b4", "A (H3N2)" = "#ff7f0e", "A (Unknown Subtype)" = "#2ca02c", "B" = "#d62728")
   
+  #subset data
   userdatalabbar = reactive({
-      return(labcount[(labcount$Subtype %in% input$labbarstrain) & (labcount$Season == "2019-20"), ]) 
-  })
-  
-  #NOTE: Explored hover functionality for bar plots but was unsuccessful, work on a solution at later date 
-  #Until hover option built in, duplicated plots as seen above are not necessary)
-  
-  #Plot for download handler
-  labbplot <- reactive({
-    
-    ggplot(userdatalabbar(), aes(x = Week_Start, y = Count, fill = Subtype)) +
-      geom_col(position = input$labbartype) +
-      labs(title = "Number of Laboratory Specimens Positive for Influenza by Strain", x = "MMWR Week Starting Date", y = "Count") +
-      scale_fill_manual(values = groupcolorslab, name = "Strain") +
-      scale_y_continuous(expand = c(0,0)) +
-      theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), legend.title = element_text(size = 14, face = "bold"), 
-            legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 12),
-            axis.text.x = element_text(angle = 70, hjust = 1), panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line())
-    
+
+    labcount %>%
+      filter(Subtype %in% input$labbarstrain,
+             Season == season_name
+             ) %>%
+      group_by(Subtype) %>%
+      complete(Week_Start) %>%
+      ungroup() %>%
+      mutate(Subtype = factor(Subtype, levels = c("A (H1N1)", "A (H3N2)", "A (Unknown Subtype)", "B"), ordered = T))
     
   })
   
-  #Plot for app display
-  output$labbarplot <- renderPlot({
+  #bar chart
+  output$lab_strains_plotly = renderPlotly({
     
-   labbplot()
+    #set color pal
+    pal = c("A (H1N1)" = "#1f77b4", "A (H3N2)" = "#ff7f0e", 
+            "A (Unknown Subtype)" = "#2ca02c", "B" = "#d62728")
+    
+    #set min and max axis values
+    minx = min(userdatalabbar()$Week_Start)
+    maxx = max(userdatalabbar()$Week_Start)
+    miny = 0
+    maxy = userdatalabbar() %>%
+      group_by(Week_Start) %>%
+      summarise(count = sum(Count)) %>%
+      pull(count) %>%
+      max(na.rm = T) %>%
+      add(1) %>%
+      max(., 5)
+    
+    #Legend Titile
+    legendtitle = list(yref='paper',xref="paper",y=1.05,x=1.097, text="<b>Strain</b>",showarrow=F)
+    
+    #plot
+    plot_ly(userdatalabbar(), x=~Week_Start, y=~Count, type = "bar", color = ~Subtype,
+            colors = pal, hovertemplate = paste('%{y}')) %>%
+      layout(barmode = input$labbartype,
+             hovermode = "compare",
+             annotations = legendtitle,
+             xaxis = list(title = "Week", showgrid = F, showline = T, range = c(minx, maxx)),
+             yaxis = list(title = "Count", showgrid = F, showline = T, range = c(miny, maxy)),
+             title = "Number of Laboratory Specimens Positive for Influenza by Strain",
+             margin = list(t = 50),
+             showlegend = T
+             )
+
+    
     
   })
   
-  output$downloadlabbar <- downloadHandler(
-    filename = "Lab_Data_by_Strain.png",
-    content = function(labbarfile){
-      ggsave(labbarfile, plot = labbplot(), device = "png", height = 3, width = 10, unit = "in")
-    }
-  )
+  
   
   #========LINE PLOT=======#
   groupcolorsperpos <- c("2019-20" = "#d62728", "2018-19"= "#91D1FF", "2017-18" = "#619FCC", "2016-17" = "#335E7C")
 
   userdatalabline = reactive({
-    return(unique(labcount[labcount$Season %in% input$labpick,])) 
+    labcount %>%
+      filter(Season %in% input$labpick) %>%
+      select(Season, Week_Start, Percent_Pos) %>%
+      unique() %>%
+      group_by(Season) %>%
+      complete(Week_Start)
+  })
+  
+  
+  #plotly
+  output$lab_percent_plotly = renderPlotly({
+    
+    #Set color pal
+    pal = tableau_color_pal(direction = -1)(length(unique(labcount$Season)))
+    names(pal) = unique(labcount$Season)
+    
+    #Set axis mins and maxs
+    minx = min(userdatalabline()$Week_Start)
+    maxx = max(userdatalabline()$Week_Start)
+    miny = 0
+    maxy = ceiling(max(userdatalabline()$Percent_Pos, na.rm = T)) + 2
+    
+    #Legend title annotation
+    legendtitle = list(yref='paper',xref="paper",y=1.05,x=1.08, text="<b>Season</b>",showarrow=F)
+    
+    #plot
+    plot_ly(data = userdatalabline(), x = ~Week_Start, y = ~Percent_Pos, color = ~Season, 
+                   colors = pal, hovertemplate = paste('%{y}'),
+                   line = list(width = 3),
+                   type = "scatter", mode = "lines") %>%
+      layout(hovermode = "compare",
+             xaxis = list(title = "Week", showgrid = F, range = c(minx, maxx), showline = T),
+             yaxis = list(title = "% of Positive Specimens", showgrid = F, range = c(miny, maxy), showline = T),
+             title = "Percent of Lab Specimens Positive for Influenza",
+             annotations=legendtitle,
+             margin = list(r=25,l=50,t=50,b=0),
+             showlegend = T
+             
+      )
+    
   })
   
 
 
   #Plot for download handler
   lablplot <- reactive({
+    
     
     ggplot(data = userdatalabline(), aes(x = Week_Start, y = Percent_Pos, color = Season)) +
       geom_point(size = 3) + 
@@ -451,77 +455,123 @@ server <- function(input, output) {
  
   #========LINE PLOT=======#
   
-  #Subsetting just smoothed data to use in plot
-  pism <- pi[pi$Value_Type != "Actual", ]
   
-  colorpi <- c("Epidemic Threshold" = "#1f77b4", "Baseline" = "#1f77b4", "PI Death (Smoothed)" = "#d62728")
-  
-  linepi <- c("Epidemic Threshold" = 1, "Baseline" = 3, "PI Death (Smoothed)" = 1)
-  
-  
-  #Plot for download handler
-  piprintplot <- reactive({
+  output$pic_plot = renderPlotly({
     
-    ggplot(data = pism, aes(x = date_ish, y = Percent, color = Value_Type)) +
+    #Subsetting just smoothed data to use in plot
+    pism <- pic_clean %>%
+      filter(Value_Type != "Actual") %>%
+      mutate(Percent = round(Percent,2)) %>%
+      rename(Date = `date_ish`) %>%
+      mutate(Date = Date + 6)
+    
+    
+    colorpi <- c("Epidemic Threshold" = "#4e79a7", "Baseline" = "#4e79a7", "PI Death (Smoothed)" = "#d62728")
+    linepi <- c("Epidemic Threshold" = 1, "Baseline" = 3, "PI Death (Smoothed)" = 1)
+    maxp = max(pism$Percent, na.rm = T) %>% add(1) %>% ceiling()
+    
+    pip = ggplot(data = pism, aes(x = Date, y = Percent, color = Value_Type, 
+                                  text = paste0("</br>",
+                                                format(Date, "%b %d, %Y"), "</br>",
+                                                Value_Type, ": ", Percent, "%")
+    )) +
       geom_line(aes(group = Value_Type, linetype = Value_Type), size = 1) +
-      labs(title = "Proportion of Deaths Associated with Pneumonia or Influenza\n", x = "Date", y = "% of Deaths due to Pneumonia/Flu") +
+      labs(title = "Proportion of Deaths Associated\n with Pneumonia, Influenza, or COVID-19\n", x = "", y = "% of Deaths due to\nPneumonia/Flu/COVID") +
       scale_color_manual(values = colorpi, name = "") +
       scale_linetype_manual(values = linepi, name = "") +
-      scale_y_continuous(limits = c(2,11), expand = c(0,0)) +
+      scale_y_continuous(limits = c(2,maxp), expand = c(0,0)) +
       scale_x_date(date_breaks = "3 month", date_labels =  "%b %Y") +
-      theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), legend.title = element_text(size = 14, face = "bold"), 
-            legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 14),
-            panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line(), axis.text.x = element_text(angle = 70, hjust = 1),
-            strip.text.x = element_text(size = 12, face = "bold")) +
+      theme(plot.title = element_text( hjust = 0.5),
+            panel.grid = element_blank(), 
+            panel.background = element_blank(),
+            axis.line = element_line(),
+            axis.text.x = element_text(angle = 70, hjust = 1)
+
+      ) +
       facet_grid(. ~ Season, scales = "free_x")
     
+    ggplotly(pip, tooltip = c("text")) %>%
+      layout(hovermode = "compare",
+             margin = list(r=100,l=100,t=125,b=50)
+             ) 
     
   })
   
   
-  #Plot for app display
-  output$piplot <- renderPlot({
-    
-    piprintplot()
-    
-    
-  })
   
-  output$downloadpi <- downloadHandler(
-    filename = "PI_Mort_Smooth.png",
-    content = function(pifile){
-      ggsave(pifile, plot = piprintplot(), device = "png", height = 5, width = 10, unit = "in")
-    }
-  )
   
-  output$hover_info_pi <- renderUI({
-    
-    hover <- input$plot_hover_pi
-    point <- nearPoints(pism, hover, threshold = 5, maxpoints = 1, addDist = TRUE)
-    if (nrow(point) == 0) return(NULL)
-    
-    # calculate point position INSIDE the image as percent of total dimensions
-    # from left (horizontal) and from top (vertical)
-    left_pct <- (hover$x - hover$domain$left) / (hover$domain$right - hover$domain$left)
-    top_pct <- (hover$domain$top - hover$y) / (hover$domain$top - hover$domain$bottom)
-    
-    # calculate distance from left and bottom side of the picture in pixels
-    left_px <- hover$range$left + left_pct * (hover$range$right - hover$range$left)
-    top_px <- hover$range$top + top_pct * (hover$range$bottom - hover$range$top)
-    
-    # create style property fot tooltip
-    # background color is set so tooltip is a bit transparent
-    # z-index is set so we are sure are tooltip will be on top
-    style <- paste0("position:absolute; z-index:100; background-color: rgba(245, 245, 245, 0.85); ",
-                    "left:", left_px + 2, "px; top:", top_px + 2, "px;")
-    
-    # actual tooltip created as wellPanel
-    wellPanel(
-      style = style,
-      p(HTML(paste0("<b> Value: </b>", point$Value_Type, "<br/>",
-                    "<b> Proportion: </b>", point$Percent, "<br/>")))
-    )
-  })
+  
+  # #Subsetting just smoothed data to use in plot
+  # pism <- pi[pi$Value_Type != "Actual", ]
+  # 
+  # colorpi <- c("Epidemic Threshold" = "#1f77b4", "Baseline" = "#1f77b4", "PI Death (Smoothed)" = "#d62728")
+  # 
+  # linepi <- c("Epidemic Threshold" = 1, "Baseline" = 3, "PI Death (Smoothed)" = 1)
+  # 
+  # 
+  # #Plot for download handler
+  # piprintplot <- reactive({
+  #   
+  #   ggplot(data = pism, aes(x = date_ish, y = Percent, color = Value_Type)) +
+  #     geom_line(aes(group = Value_Type, linetype = Value_Type), size = 1) +
+  #     labs(title = "Proportion of Deaths Associated with Pneumonia or Influenza\n", x = "Date", y = "% of Deaths due to Pneumonia/Flu") +
+  #     scale_color_manual(values = colorpi, name = "") +
+  #     scale_linetype_manual(values = linepi, name = "") +
+  #     scale_y_continuous(limits = c(2,11), expand = c(0,0)) +
+  #     scale_x_date(date_breaks = "3 month", date_labels =  "%b %Y") +
+  #     theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), legend.title = element_text(size = 14, face = "bold"), 
+  #           legend.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), axis.text = element_text(size = 14),
+  #           panel.grid = element_blank(), panel.background = element_blank(), axis.line = element_line(), axis.text.x = element_text(angle = 70, hjust = 1),
+  #           strip.text.x = element_text(size = 12, face = "bold")) +
+  #     facet_grid(. ~ Season, scales = "free_x")
+  #   
+  #   
+  # })
+  # 
+  # 
+  # #Plot for app display
+  # output$piplot <- renderPlot({
+  #   
+  #   piprintplot()
+  #   
+  #   
+  # })
+  # 
+  # output$downloadpi <- downloadHandler(
+  #   filename = "PI_Mort_Smooth.png",
+  #   content = function(pifile){
+  #     ggsave(pifile, plot = piprintplot(), device = "png", height = 5, width = 10, unit = "in")
+  #   }
+  # )
+  # 
+  # output$hover_info_pi <- renderUI({
+  #   
+  #   hover <- input$plot_hover_pi
+  #   point <- nearPoints(pism, hover, threshold = 5, maxpoints = 1, addDist = TRUE)
+  #   if (nrow(point) == 0) return(NULL)
+  #   
+  #   # calculate point position INSIDE the image as percent of total dimensions
+  #   # from left (horizontal) and from top (vertical)
+  #   left_pct <- (hover$x - hover$domain$left) / (hover$domain$right - hover$domain$left)
+  #   top_pct <- (hover$domain$top - hover$y) / (hover$domain$top - hover$domain$bottom)
+  #   
+  #   # calculate distance from left and bottom side of the picture in pixels
+  #   left_px <- hover$range$left + left_pct * (hover$range$right - hover$range$left)
+  #   top_px <- hover$range$top + top_pct * (hover$range$bottom - hover$range$top)
+  #   
+  #   # create style property fot tooltip
+  #   # background color is set so tooltip is a bit transparent
+  #   # z-index is set so we are sure are tooltip will be on top
+  #   style <- paste0("position:absolute; z-index:100; background-color: rgba(245, 245, 245, 0.85); ",
+  #                   "left:", left_px + 2, "px; top:", top_px + 2, "px;")
+  #   
+  #   # actual tooltip created as wellPanel
+  #   wellPanel(
+  #     style = style,
+  #     p(HTML(paste0("<b> Value: </b>", point$Value_Type, "<br/>",
+  #                   "<b> Proportion: </b>", point$Percent, "<br/>")))
+  #   )
+  # })
   
   #========DATA TABLE=======#
 
