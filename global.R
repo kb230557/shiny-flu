@@ -13,6 +13,9 @@ library("ggthemes")
 library("plotly")
 library("tidyverse")
 library("magrittr")
+library("shinydashboard")
+library("shinyWidgets")
+library("shinythemes")
 
 load("flu.Rdata")
 

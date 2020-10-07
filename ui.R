@@ -1,6 +1,6 @@
 
 
-ui <- fluidPage(
+ui <- fluidPage(theme = shinytheme("flatly"),
   
   # NOTE - Functions to access the www folder (e.g. theme = and src = for images) were unsuccessful (folder permissions maybe?)
   
@@ -13,6 +13,9 @@ ui <- fluidPage(
                               function gtag(){dataLayer.push(arguments);}
                               gtag('js', new Date());
                               gtag('config', 'UA-107917571-1')"))),
+  
+  useShinydashboard(),
+  
   
   #Building the header 
   fluidRow(class = "header",
