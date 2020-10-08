@@ -60,8 +60,8 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                        severe outcomes, such as hospitalizations and deaths, that can be attributed to influenza. Data in this application will be updated
                        on Friday afternoons.", align = "justify", style = "padding-bottom: 10px"),
                      p("*The Centers for Disease Control and Prevention aggregates influenza data by ", a(href = "https://wwwn.cdc.gov/nndss/document/W2018-19.pdf",
-                        "MMWR Weeks. "), "MMWR Weeks run from Sunday to Saturday. For simplicity, graphs in this application typically display the first day of the MMWR Week 
-                        on the x axis. Starting dates are accurate for 2019 and 2020 but are approximations for all other years displayed."),
+                        "MMWR Weeks. "), "MMWR Weeks run from Sunday to Saturday. For simplicity, graphs in this application typically display the last day of the MMWR Week 
+                        on the x axis. Ending dates are accurate for 2020 and 2021 but are approximations for all other years displayed."),
                      p(id = "info", "For more information on influenza, please visit the Centers for Disease Control and Prevention at ",
                        a(href = "https://www.cdc.gov/flu/", "https://www.cdc.gov/flu/. "), "Information and recommendations for healthcare professionals
                        can be found ", a(href = "https://www.cdc.gov/flu/professionals/index.htm", "here.")),
@@ -169,13 +169,13 @@ ui <- fluidPage(theme = shinytheme("flatly"),
            
            sliderInput(inputId = "mapweek",
                       label = "Drag the slider to select the week of interest* or click play to see an animation of all weeks to date:",
-                      min = MMWRweek2Date(season, 35, 1), max = start, step = 7, ticks = FALSE, 
-                      value = start, timeFormat = "%m-%d-%y",
+                      min = (MMWRweek2Date(season, 35, 1) + 6), max = start+6, step = 7, ticks = FALSE, 
+                      value = start+6, timeFormat = "%m-%d-%y",
                       animate = animationOptions(interval = 1200)),
           
            checkboxInput(inputId = "hosploc", label = "Show hospital locations on map?"),
            
-           tags$div(tags$small("* Week starting date is displayed.",
+           tags$div(tags$small("* Week ending date is displayed.",
                                style = "font-style: italic")) #, style = "padding-bottom: 10px")
           
         ), #ED map sidebar panel closure

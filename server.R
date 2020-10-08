@@ -8,6 +8,17 @@ server <- function(input, output) {
   #options(shiny.usecairo=T)
   
   
+  #color pal
+  seasons_color_pal = reactive({
+    
+    seasons = unique(labcount$Season) %>% sort()
+    pal = c(brewer.pal(11, "RdBu")[7:11], brewer.pal(11, "RdBu")[2], brewer.pal(9, "Oranges")[6], "black")
+    names(pal) = c(seasons, "COVID-like Illness", "All")
+
+    return(pal)
+    
+  })
+  
   #==========================================ED DATA BY SEASON (SERVER)=============================================================#
   
   
@@ -26,8 +37,9 @@ server <- function(input, output) {
   output$edyr_plotly = renderPlotly({
     
     #Set color pal
-    pal = tableau_color_pal()(length(unique(fluedyr$Season)))
-    names(pal) = unique(fluedyr$Season)
+    #pal = tableau_color_pal()(length(unique(fluedyr$Season)))
+    #names(pal) = unique(fluedyr$Season)
+    pal = seasons_color_pal()
     
     #Set axis mins and maxs
     minx = min(userdatayr()$Week_Start)
@@ -155,7 +167,7 @@ server <- function(input, output) {
   
   #Creating labels for map based on selected week
   labels <- reactive ({
-    sprintf("<strong>%s</strong><br/>%g %%", zips$ZCTA5CE10, mapdata()$Week) %>% lapply(htmltools::HTML)
+    sprintf("<strong>%s</strong><br/>%g %%", zips$ZCTA5CE10, round(mapdata()$Week, 2)) %>% lapply(htmltools::HTML)
   })
   
   #Generating the base map so it doesn't need to be redrawn with each change 
@@ -194,7 +206,7 @@ server <- function(input, output) {
     
     #Creating color palette
     bins <- c(0,1,2,4,6,8,10,Inf)
-    pal <- colorBin("Blues", bins = bins, na.color=NA)
+    pal <- colorBin("RdYlBu", bins = bins, na.color=NA, reverse = T)
     
     labs <- labels()
     
@@ -239,9 +251,6 @@ server <- function(input, output) {
   
   
   #==========================================LAB DATA (SERVER)=============================================================#
-  
-  #See code comments from ED DATA BY SEASON section
-  
   
   #========BAR PLOT=======#
   
@@ -317,9 +326,12 @@ server <- function(input, output) {
   output$lab_percent_plotly = renderPlotly({
     
     #Set color pal
-    pal = tableau_color_pal(direction = -1)(length(unique(labcount$Season)))
-    names(pal) = unique(labcount$Season)
-    
+    #pal = tableau_color_pal(direction = -1)(length(unique(labcount$Season)))
+    #pal = c(viridis(5, end = 0.85, direction = -1), "red")
+    #names(pal) = unique(labcount$Season)
+ 
+    pal = seasons_color_pal()
+
     #Set axis mins and maxs
     minx = min(userdatalabline()$Week_Start)
     maxx = max(userdatalabline()$Week_Start)
@@ -369,13 +381,21 @@ server <- function(input, output) {
              Cases = n
              ) %>%
       group_by(season) %>%
-      complete(Week, fill = list(n = NA))
+      complete(Week, fill = list(n = NA)) %>%
+      mutate(total = sum(Cases, na.rm = T),
+             label = paste0(season, " (Total = ", total, ")")
+             )
     
-    p<- ggplot(data=plot_data, aes(x=Week, y=Cases,group=season, fill ="")) + #, fill =season -- add if want dif colors
+    #plot all other years a single blue color and current year as red
+    colors = seasons_color_pal()[plot_years]
+    colors[names(colors) != season_name] = seasons_color_pal()[4]
+    
+    p<- ggplot(data=plot_data, aes(x=Week, y=Cases,group=season, fill =season)) + #, fill =season -- add if want dif colors
       geom_bar(stat = "identity")+
-      scale_fill_tableau()+
+      #scale_fill_tableau()+
+      scale_fill_manual(values = colors) +
       expand_limits(y = 4) +
-      facet_wrap(~season, nrow = plot_rows()) +
+      facet_wrap(~label, nrow = plot_rows()) +
       theme(axis.text.x = element_text(angle = 90,color=rep(c("black","transparent"),11),
                                        size = 8),
             panel.grid.major.x = element_blank(),

@@ -16,6 +16,8 @@ library("magrittr")
 library("shinydashboard")
 library("shinyWidgets")
 library("shinythemes")
+library("viridis")
+library("RColorBrewer")
 
 load("flu.Rdata")
 
