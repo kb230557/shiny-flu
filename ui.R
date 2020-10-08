@@ -5,7 +5,7 @@ ui <- fluidPage(theme = shinytheme("flatly"),
   # NOTE - Functions to access the www folder (e.g. theme = and src = for images) were unsuccessful (folder permissions maybe?)
   
   #Bring in extra CSS to style application
-  includeCSS("fluapp.css"),
+  includeCSS("app.css"),
   
   #Add Google analytics global tracking code
   tags$head(HTML('<script async src="https://www.googletagmanager.com/gtag/js?id=UA-107917571-1"></script>')),

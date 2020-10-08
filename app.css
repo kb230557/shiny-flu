@@ -1,0 +1,136 @@
+
+/*
+==================================
+Primary Header
+=================================
+*/
+
+.header {
+  height: 120px;
+  background: #fff;
+  border-bottom: 6px solid #6E9DC9;
+  /*Blue to Dark Gray, down
+  background: -webkit-linear-gradient(#6E9DC9, #2E465E);
+  background: -moz-linear-gradient(#6E9DC9, #2E465E);
+  background: linear-gradient(#6E9DC9, #2E465E);*/
+
+/*White to Blue, to right
+  background: -webkit-linear-gradient(to right, #fff, #6E9DC9);
+  background: -moz-linear-gradient(to right, #fff, #6E9DC9);
+  background: linear-gradient(to right, #fff, #6E9DC9);*/
+}
+
+.headimg {
+  height:120px;
+}
+
+.headtitle {
+    position: relative;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%);
+    color: #000000;
+    font-size: 80px;
+    letter-spacing: .07em;
+}
+
+#beta {
+  color: #F33535;
+}
+
+
+/*
+==================================
+Home Tab
+=================================
+*/
+.homestrip {
+  height: 200px;
+}
+
+#risk {
+   padding-bottom: 10px;
+   padding-top: 10px;
+   text-align: center;
+   background: #ecf2f8;
+   border: 3px solid #6E9DC9;
+   border-radius: 10px;
+   font-size: 15px;
+}
+
+#info {
+   padding-bottom: 10px;
+   padding-top: 10px;
+   text-align: center;
+   background:  #f3f1f3;
+   border: 3px solid #dbd6db;
+   font-size: 12px;
+}
+
+
+/*
+==================================
+Map Slider
+=================================
+*/
+.js-irs-0 .irs-bar {
+border-top-color: #CCC;
+border-bottom-color: #CCC;
+}
+
+.js-irs-0 .irs-bar-edge {
+border-color: #CCC;
+}
+
+.js-irs-0 .irs-bar-edge, .js-irs-0 .irs-bar {
+background: #EEE;
+}
+
+
+/*
+==================================
+General Styles
+=================================
+*/
+
+p {
+  letter-spacing: .05em;
+}
+
+
+.imggen {
+  max-height: 100%;
+  max-width: 100%;
+  position: relative;
+  top: 50%;
+  -webkit-transform: translateY(-50%);
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+  display:block;
+  margin:auto;
+}
+
+
+/*.navbar-default .navbar-nav>li>a:focus, .navbar-default .navbar-nav>li>a:hover {
+    background-color: #6E9DC9;
+    color: white;
+    
+    
+}
+
+.menu > li.active{
+    background-color: #6E9DC9;
+    color: white;
+}*/
+
+a{
+  color: #6E9DC9;
+}
+
+.navbar-default .navbar-nav>li>a:focus, .navbar-default .navbar-nav>li>a:hover {
+    background-color: #1A232E;
+    color: #6E9DC9;
+    
+    
+}
