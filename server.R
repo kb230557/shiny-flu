@@ -242,10 +242,12 @@ server <- function(input, output) {
                                       textsize = "14px", direction = "auto"))   
     
     #Turn layer on and off based on whether hospital box on UI is checked
-    if (input$hosploc)  {
-      proxy %>% showGroup("hosps")
-    }
-    else (proxy %>% hideGroup("hosps"))
+    # if (input$hosploc)  {
+    #   proxy %>% showGroup("hosps")
+    # }
+    # else (proxy %>% hideGroup("hosps"))
+    
+    proxy %>% hideGroup("hosps") #delete if put hosp locations option back in
     
   })
   
@@ -400,6 +402,8 @@ server <- function(input, output) {
                                        size = 8),
             panel.grid.major.x = element_blank(),
             panel.grid.minor.x = element_blank(),
+            #panel.grid.minor.y = element_blank(),
+            #panel.grid.major.y = element_blank(),
             panel.background = element_rect(fill = "white", colour = "grey50"),
             panel.grid.major = element_line(colour = "grey80"),
             plot.margin = margin(t=10,r=10,b=10,l=50),

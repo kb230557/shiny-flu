@@ -15,6 +15,7 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                               gtag('config', 'UA-107917571-1')"))),
   
   useShinydashboard(),
+  tags$head(tags$style(HTML(".small-box {height: 120px}"))),
   
   
   #Building the header 
@@ -29,20 +30,69 @@ ui <- fluidPage(theme = shinytheme("flatly"),
     tabPanel("Home",
              #Building Vertical strip of images on home page
              fluidRow(
-               column(2, style = "padding-right: 50px;",
-                      fluidRow(
-                        column(12, class = "homestrip", img(src="https://phil.cdc.gov/PHIL_Images/11213/11213_lores.jpg", class = "img-responsive imggen"))
-                      ),
-                      fluidRow(
-                        column(12, class = "homestrip", img(src="https://phil.cdc.gov/PHIL_Images/11213/11213_lores.jpg", class = "img-responsive imggen"))
-                      ),
-                      fluidRow(
-                        column(12, class = "homestrip", img(src="https://phil.cdc.gov/PHIL_Images/11213/11213_lores.jpg", class = "img-responsive imggen"))
-                      )
-               ),
+               # column(2, style = "padding-right: 50px;",
+               #        fluidRow(
+               #          column(12, class = "homestrip", img(src="https://phil.cdc.gov/PHIL_Images/11213/11213_lores.jpg", class = "img-responsive imggen"))
+               #        ),
+               #        fluidRow(
+               #          column(12, class = "homestrip", img(src="https://phil.cdc.gov/PHIL_Images/11213/11213_lores.jpg", class = "img-responsive imggen"))
+               #        ),
+               #        fluidRow(
+               #          column(12, class = "homestrip", img(src="https://phil.cdc.gov/PHIL_Images/11213/11213_lores.jpg", class = "img-responsive imggen"))
+               #        )
+               # ),
                #Building home page text    
                
-               column(7, h4(strong("Cook County Department of Public Health Weekly Influenza Surveillance"), style = "padding-bottom: 10px; padding-top: 5px"),
+               #Value boxes
+               column(width = 3, offset = 1, 
+                      style='margin-bottom:30px;margin-top:10px;border-right:1px solid #EBEBEB; padding: 5px;',
+                      
+                      h4("For Week", paste0(week, ","), "ending", format(as.Date(end), "%b %d, %Y:"), align = "center"),
+                      
+                      #risk level
+                      valueBox(
+                        str_to_title(risk_level), 
+                        width = 12,
+                        p("Risk Level for\nInfluenza", style = "font-size: 125%;"), 
+                        icon = icon(""), 
+                        color = ifelse(str_to_title(risk_level) == "Low", "olive",
+                                       ifelse(str_to_title(risk_level) == "High", "red", "yellow")
+                        )
+                        
+                      ),
+                      
+                      #ili
+                      valueBox(
+                        ili_num, 
+                        width = 12,
+                        p("Percent of ED Visits for Influenza-like Illness", style = "font-size: 125%;"), 
+                        icon = icon(""), color = "light-blue"
+                        
+                      ),
+                      
+                      #perc pos
+                      valueBox(
+                        lab_percent,
+                        width = 12,
+                        p("Percent of Lab Specimens Positive for Influenza", style = "font-size: 125%;"), 
+                        icon = icon(""), color = "light-blue"
+                        
+                      ),
+                      
+                      #icu cases
+                      valueBox(
+                        icu_num_week, 
+                        width = 12,
+                        p("Number of Influenza ICU Cases", style = "font-size: 125%;"), 
+                        icon = icon(""), color = "light-blue"
+                        
+                      )
+                      
+               ),
+               
+               
+               column(7, offset = 0, br(),
+                      h4(strong("Cook County Department of Public Health Weekly Influenza Surveillance"), style = "padding-bottom: 10px; padding-top: 5px"), 
                       # p(id="risk", "As of ",strong(paste("Week", week))," the risk of influenza in Suburban Cook
                       #       County is ", strong(paste0(toupper(risk_level), "."))),   
                      p(id="risk", "Surveillance for the 2019-2020 influenza season has been suspended due to the demands of the COVID-19 response. We
@@ -66,8 +116,10 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                        a(href = "https://www.cdc.gov/flu/", "https://www.cdc.gov/flu/. "), "Information and recommendations for healthcare professionals
                        can be found ", a(href = "https://www.cdc.gov/flu/professionals/index.htm", "here.")),
                      tags$small("The Cook County Department of Public Health would like to thank all of our surveillance partners for their help in collecting
-                                 this information.",style = "font-style: italic")
-               )
+                                 this information.",style = "font-style: italic"),
+                     br(), br(), br()
+               ) #close home page info column
+               
              ) #fluid Row closure
     ),#Home Tab Panel closure
     tabPanel("ED Data", id = "ED_Data", #ids added to potentially use in Google Analytics event tracking, may need modification for code to function
@@ -169,11 +221,11 @@ ui <- fluidPage(theme = shinytheme("flatly"),
            
            sliderInput(inputId = "mapweek",
                       label = "Drag the slider to select the week of interest* or click play to see an animation of all weeks to date:",
-                      min = (MMWRweek2Date(season, 35, 1) + 6), max = start+6, step = 7, ticks = FALSE, 
-                      value = start+6, timeFormat = "%m-%d-%y",
+                      min = (MMWRweek2Date(season, 35, 1) + 6), max = end, step = 7, ticks = FALSE, 
+                      value = end, timeFormat = "%m-%d-%y",
                       animate = animationOptions(interval = 1200)),
           
-           checkboxInput(inputId = "hosploc", label = "Show hospital locations on map?"),
+           #checkboxInput(inputId = "hosploc", label = "Show hospital locations on map?"),
            
            tags$div(tags$small("* Week ending date is displayed.",
                                style = "font-style: italic")) #, style = "padding-bottom: 10px")
@@ -182,7 +234,8 @@ ui <- fluidPage(theme = shinytheme("flatly"),
         
         mainPanel(    
       
-          leafletOutput("EDmap")
+          leafletOutput("EDmap"),
+          br(), br()
     
         ) #ED Map main panel closure
       ) #ED Map sidebay layout closure
