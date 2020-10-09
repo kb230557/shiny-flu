@@ -47,14 +47,14 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                column(width = 3, offset = 1, 
                       style='margin-bottom:30px;margin-top:10px;border-right:1px solid #EBEBEB; padding: 5px;',
                       
-                      h4("For Week", paste0(week, ","), "ending", format(as.Date(end), "%b %d, %Y:"), align = "center"),
+                      h4("For Week", paste0(week, ","), "ending", format(as.Date(end), "%b %d, %Y*:"), align = "center"),
                       
                       #risk level
                       valueBox(
                         str_to_title(risk_level), 
                         width = 12,
                         p("Risk Level for\nInfluenza", style = "font-size: 125%;"), 
-                        icon = icon(""), 
+                        icon = icon("exclamation"), 
                         color = ifelse(str_to_title(risk_level) == "Low", "olive",
                                        ifelse(str_to_title(risk_level) == "High", "red", "yellow")
                         )
@@ -66,7 +66,7 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                         ili_num, 
                         width = 12,
                         p("Percent of ED Visits for Influenza-like Illness", style = "font-size: 125%;"), 
-                        icon = icon(""), color = "light-blue"
+                        icon = icon("user-md"), color = "light-blue"
                         
                       ),
                       
@@ -75,7 +75,7 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                         lab_percent,
                         width = 12,
                         p("Percent of Lab Specimens Positive for Influenza", style = "font-size: 125%;"), 
-                        icon = icon(""), color = "light-blue"
+                        icon = icon("vial"), color = "light-blue"
                         
                       ),
                       
@@ -84,7 +84,7 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                         icu_num_week, 
                         width = 12,
                         p("Number of Influenza ICU Cases", style = "font-size: 125%;"), 
-                        icon = icon(""), color = "light-blue"
+                        icon = icon("hospital"), color = "light-blue"
                         
                       )
                       
@@ -95,23 +95,19 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                       h4(strong("Cook County Department of Public Health Weekly Influenza Surveillance"), style = "padding-bottom: 10px; padding-top: 5px"), 
                       # p(id="risk", "As of ",strong(paste("Week", week))," the risk of influenza in Suburban Cook
                       #       County is ", strong(paste0(toupper(risk_level), "."))),   
-                     p(id="risk", "Surveillance for the 2019-2020 influenza season has been suspended due to the demands of the COVID-19 response. We
-                       apologize for the inconvenience and appreciate your understanding. A selection of our ILI metrics are being monitored weekly and can be viewed ",
-                       a(href = "https://ccdphcd.shinyapps.io/covid19/", "here.", target = "_blank")),
+                     # p(id="risk", "Surveillance for the 2019-2020 influenza season has been suspended due to the demands of the COVID-19 response. We
+                     #   apologize for the inconvenience and appreciate your understanding. A selection of our ILI metrics are being monitored weekly and can be viewed ",
+                     #   a(href = "https://ccdphcd.shinyapps.io/covid19/", "here.", target = "_blank")),
                      p("The Cook County Department of Public Health collects and analyzes data on local influenza activity year-round. During periods when higher
-                        influenza activity is expected (from MMWR Week 40 through MMWR Week 20*), this information is compiled into a weekly surveillance
+                        influenza activity is expected (generally October to May), this information is compiled into a weekly surveillance
                        report that is distributed to our partners in the healthcare community, schools, community groups, and the public. This application
-                       is a companion to our weekly surveillance report. Copies of the reports can be found",
-                       a(href = "https://www.cookcountypublichealth.org/data-reports/communicable-disease-data-reports/", "here."), "Please click ", 
-                       a(href = "mailto:kbemis@cookcountyhhs.org?Subject=Shiny%20Flu%20App", "here"), " to send comments or questions on this application.", align = "justify", style = "padding-bottom: 10px"),
-                     p("Influenza surveillance data is collected from multiple sources including emergency department (ED) visits, visits to outpatient
+                       is a companion to our weekly surveillance report. Copies of those reports can be found",
+                       a(href = "https://www.cookcountypublichealth.org/data-reports/communicable-disease-data-reports/", "here."), align = "justify", style = "padding-bottom: 10px"),
+                     p("Influenza surveillance data are collected from multiple sources including emergency department (ED) visits, visits to outpatient
                        sentinel healthcare providers, laboratory tests, intensive-care unit (ICU) hospitalizations, and deaths. The goal of influenza
-                       surveillance is to determine when and where influenza activity is occuring, what influenza viruses are circulating, and the amount of
-                       severe outcomes, such as hospitalizations and deaths, that can be attributed to influenza. Data in this application will be updated
-                       on Friday afternoons.", align = "justify", style = "padding-bottom: 10px"),
-                     p("*The Centers for Disease Control and Prevention aggregates influenza data by ", a(href = "https://wwwn.cdc.gov/nndss/document/W2018-19.pdf",
-                        "MMWR Weeks. "), "MMWR Weeks run from Sunday to Saturday. For simplicity, graphs in this application typically display the last day of the MMWR Week 
-                        on the x axis. Ending dates are accurate for 2020 and 2021 but are approximations for all other years displayed."),
+                       surveillance is to determine when and where influenza activity is occuring, what influenza viruses are circulating, and how severe the season is (as measured by hospitalizations and deaths).", align = "justify", style = "padding-bottom: 10px"),
+                     p("It is important to note that influenza surveillance may be especially challenging during the 2020-21 season. COVID-19 and influenza present with similar symptoms. This means our typical indicators for influenza-like illness (ILI) may be less accurate in reflecting influenza activity than in previous years. Data should be interpreted with caution, especially when comparing this season to other years. In addition, it's too early to tell how behavioral changes resulting from the pandemic - including both social distancing measures and changes in health-care seeking behavior - will impact the influenza season. Surveillance data for COVID-19 is also available online ",a(href = "https://ccdphcd.shinyapps.io/covid19/", "here."), align = "justify", style = "padding-bottom: 10px"),
+                     p("*Influenza surveillance data are typically aggregated by week. This app is updated on Fridays for the previous Saturday through Sunday. On all graphs, the week ending date is displayed. Ending dates are accurate for 2020 and 2021 but are approximations for all other years."),
                      p(id = "info", "For more information on influenza, please visit the Centers for Disease Control and Prevention at ",
                        a(href = "https://www.cdc.gov/flu/", "https://www.cdc.gov/flu/. "), "Information and recommendations for healthcare professionals
                        can be found ", a(href = "https://www.cdc.gov/flu/professionals/index.htm", "here.")),
@@ -133,7 +129,7 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                   p("Emergency department data are extracted from the Illinois syndromic surveillance system, which is supported
                     by the CDC's National Syndromic Surveillace Program. All acute-care hospitals in Illinois report
                     emergency department data to this system. The graphs display the proportion of emergency room visits that were for influenza-like illness(ILI) among Suburban Cook County residents. 
-                    ILI is defined as fever plus cough or sore throat.", 
+                    ILI is defined as fever plus cough or sore throat. COVID-19-like illness is defined as fever plus cough or shortness of breath, or given a diagnosis of COVID-19.", 
                     align = "justify", style = "padding-bottom: 10px"))
       ),
   
@@ -155,9 +151,9 @@ ui <- fluidPage(theme = shinytheme("flatly"),
           
       #Adding footnotes  
           tags$div(tags$small("* Influenza surveillance data are aggregated by MMWR week. Most years have 52 weeks; however some have 53 weeks. 
-                     2014 was a 53-week year. Because the last week of the calendar year is epidemiologically important for flu transmission, we have 
-                     graphed Week 53 of the 2014-15 season with Week 52 of the other flu seasons. Consequently, all other data points prior to Week 53 
-                     for the 2014-15 season have been moved forward one week, i.e., Week 52 displayed as Week 51, and so on.",
+                     This year is a 53-week year. Because the last week of the calendar year is epidemiologically important for flu transmission, we have 
+                     graphed Week 53 of this season with Week 52 of the other flu seasons. Consequently, all data points prior to Week 52 
+                     for these seasons have also been moved forward one week, i.e., Week 39 displayed as Week 40, and so on.",
                      style = "font-style: italic"), style = "padding-bottom: 10px"),
       
           tags$div(tags$small(HTML('&#167'), "The baseline value reflects the expected proportion of ED visits for ILI during 'non-influenza' weeks. Non-influenza weeks are defined as 
@@ -214,8 +210,9 @@ ui <- fluidPage(theme = shinytheme("flatly"),
           
            h3(strong("ED Data by Zip Code"), style = "padding-bottom: 10px"),
           
-           p("Emergency department data are extracted from the CCDPH syndromic surveillance system, ESSENCE. Forty-five hospital
-              emergency departments participate in ESSENCE, including all hospitals located in Suburban Cook County. The map
+           p("Emergency department data are extracted from the Illinois syndromic surveillance system, which is supported
+                    by the CDC's National Syndromic Surveillace Program. All acute-care hospitals in Illinois report
+                    emergency department data to this system. The map
             displays the proportion of emergency room visits that were for influenza-like illness(ILI) by the patient's zip code of residence. 
             ILI is defined as fever plus cough or sore throat.", align = "justify", style = "padding-bottom: 10px"),
            
@@ -249,9 +246,11 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                              p("Laboratory testing data for influenza are submitted on a weekly basis from the following laboratories: 
                                 Illinois Department of Public Health Sentinel Laboratories, NorthShore University Health System, 
                                 Loyola University Medical Center, and ACL Laboratories. Laboratories submit aggregate data for all influenza tests 
-                                performed; therefore, data contains results for individuals that reside outside of suburban Cook County. 
-                                Tests include viral culture, RT-PCR, and rapid antigen tests.", align = "justify", style = "padding-bottom: 10px"))
-        ),
+                                performed; therefore, data contain results for individuals that reside outside of suburban Cook County. 
+                                Tests include viral culture, RT-PCR, and rapid antigen tests.", align = "justify", style = "padding-bottom: 10px"),
+                            p(em("Note: As of Week 40, no positive specimens for flu have been detected. However, the number of tests performed is significantly below average for this time of year (110 total tests compared to an average of 882 in previous years)."), align = "justify", style = "padding-bottom: 10px")
+              ),
+      ),
           
           #See code comments from ED DATA BY SEASON section   
           sidebarLayout(
@@ -346,10 +345,9 @@ tabPanel("ICU Hospitalizations", id = "ICU",
 tabPanel("Mortality", id = "PI",
          
          fluidRow(
-           column( 4, h3(strong("Pneumonia/Influenza Mortality"), style = "padding-bottom: 10px; padding-top: 5px"), 
-                   p("Mortality data is reported for all residents of Cook County, including Chicago. Deaths reported with pneumonia
-                     and/or influenza listed as the immediate cause of death or a contributing factor are considered associated with
-                     pneumonia/influenza (P/I).", align = "justify", style = "padding-bottom: 5px"))
+           column( 4, h3(strong("Pneumonia-Influenza-COVID-19 Mortality"), style = "padding-bottom: 10px; padding-top: 5px"), 
+                   p("Mortality data are reported for all deaths that occur in Cook County, including Chicago. Deaths reported with pneumonia, influenza, and/or COVID-19 listed as the immediate cause of death or a contributing factor are considered associated with
+                     pneumonia/influenza/COVID-19 (PIC).", align = "justify", style = "padding-bottom: 5px"))
                    ),
          
          #See code comments from ED DATA BY SEASON section
@@ -357,13 +355,13 @@ tabPanel("Mortality", id = "PI",
            
            sidebarPanel(
              
-             p("The smoothed proportion of deaths associated with P/I (3-week running median) is displayed
-               in the graph. Mortality data lags one week behind other flu surveillance indicators.", align = "justify", style = "padding-bottom: 5px"),
+             p("The smoothed proportion of deaths associated with PIC (3-week running median) is displayed
+               in the graph. Mortality data lag one week behind other flu surveillance indicators.", align = "justify", style = "padding-bottom: 5px"),
              
-             p("Baseline and epidemic threshold values for P/I mortality are calculated based on the previous four
-               years of data using a CDC robust regression model. P/I mortality exceeding the epidemic threshold indicates the
+             p("Baseline and epidemic threshold values for PIC mortality are calculated based on the previous four
+               years of data using a CDC robust regression model. PIC mortality exceeding the epidemic threshold indicates the
                observed proportion of deaths is significantly higher than would be expected for that time of year, in the absence
-               of substantial influenza-related mortality.", align = "justify", style = "padding-bottom: 10px") 
+               of substantial COVID-19 or influenza-related mortality.", align = "justify", style = "padding-bottom: 10px") 
              
              ),#pi sidebarpanel closure 1
            
