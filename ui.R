@@ -107,7 +107,7 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                        sentinel healthcare providers, laboratory tests, intensive-care unit (ICU) hospitalizations, and deaths. The goal of influenza
                        surveillance is to determine when and where influenza activity is occuring, what influenza viruses are circulating, and how severe the season is (as measured by hospitalizations and deaths).", align = "justify", style = "padding-bottom: 10px"),
                      p("It is important to note that influenza surveillance may be especially challenging during the 2020-21 season. COVID-19 and influenza present with similar symptoms. This means our typical indicators for influenza-like illness (ILI) may be less accurate in reflecting influenza activity than in previous years. Data should be interpreted with caution, especially when comparing this season to other years. In addition, it's too early to tell how behavioral changes resulting from the pandemic - including both social distancing measures and changes in health-care seeking behavior - will impact the influenza season. Surveillance data for COVID-19 is also available online ",a(href = "https://ccdphcd.shinyapps.io/covid19/", "here."), align = "justify", style = "padding-bottom: 10px"),
-                     p("*Influenza surveillance data are typically aggregated by week. This app is updated on Fridays for the previous Saturday through Sunday. On all graphs, the week ending date is displayed. Ending dates are accurate for 2020 and 2021 but are approximations for all other years."),
+                     p("*Influenza surveillance data are typically aggregated by week. This app is updated on Fridays for the previous Sunday through Saturday. On all graphs, the week ending date is displayed. Ending dates are accurate for 2020 and 2021 but are approximations for all other years."),
                      p(id = "info", "For more information on influenza, please visit the Centers for Disease Control and Prevention at ",
                        a(href = "https://www.cdc.gov/flu/", "https://www.cdc.gov/flu/. "), "Information and recommendations for healthcare professionals
                        can be found ", a(href = "https://www.cdc.gov/flu/professionals/index.htm", "here.")),
@@ -248,7 +248,7 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                                 Loyola University Medical Center, and ACL Laboratories. Laboratories submit aggregate data for all influenza tests 
                                 performed; therefore, data contain results for individuals that reside outside of suburban Cook County. 
                                 Tests include viral culture, RT-PCR, and rapid antigen tests.", align = "justify", style = "padding-bottom: 10px"),
-                            p(em("Note: As of Week 40, no positive specimens for flu have been detected. However, the number of tests performed is significantly below average for this time of year (110 total tests compared to an average of 882 in previous years)."), align = "justify", style = "padding-bottom: 10px")
+                            p(em(paste0("Note: The total number of influenza tests performed remains significantly below average for this time of year (", current_total_tested, " total tests performed in Week ", week," compared to ", old_total_tested, " this time last year).")), align = "justify", style = "padding-bottom: 10px")
               ),
       ),
           
