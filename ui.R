@@ -247,8 +247,8 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                                 Illinois Department of Public Health Sentinel Laboratories, NorthShore University Health System, 
                                 Loyola University Medical Center, and ACL Laboratories. Laboratories submit aggregate data for all influenza tests 
                                 performed; therefore, data contain results for individuals that reside outside of suburban Cook County. 
-                                Tests include viral culture, RT-PCR, and rapid antigen tests.", align = "justify", style = "padding-bottom: 10px"),
-                            p(em(paste0("Note: The total number of influenza tests performed remains significantly below average for this time of year (", current_total_tested, " total tests performed in Week ", week," compared to ", old_total_tested, " this time last year).")), align = "justify", style = "padding-bottom: 10px")
+                                Tests include viral culture, RT-PCR, and rapid antigen tests.", align = "justify", style = "padding-bottom: 10px")#,
+                            # p(em(paste0("Note: The total number of influenza tests performed remains significantly below average for this time of year (", current_total_tested, " total tests performed in Week ", week," compared to ", old_total_tested, " this time last year).")), align = "justify", style = "padding-bottom: 10px")
               ),
       ),
           
