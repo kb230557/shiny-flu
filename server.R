@@ -56,7 +56,8 @@ server <- function(input, output) {
             line = list(width = 3),
             type = "scatter", mode = "lines") %>%
       layout(hovermode = "compare",
-             xaxis = list(title = "Week", showgrid = F, range = c(minx, maxx), showline = T),
+             xaxis = list(title = "Week", showgrid = F, range = list(-0.5, 37.5), showline = T),
+             #xaxis = list(title = "Week", showgrid = F, range = c(minx, maxx), showline = T),
              yaxis = list(title = "% of Visits", showgrid = F, range = c(miny, maxy), showline = T),
              title = "Proportion of ED Visits for ILI, Suburban Cook County",
              annotations=legendtitle,
@@ -87,15 +88,16 @@ server <- function(input, output) {
   userdataage = reactive({
 
     fluedage %>%
-      filter(Age_Group %in% input$agepick) %>%
-      group_by(Age_Group) %>%
-      complete(Week_Start) %>%
-      mutate(ED_ILI = round(ED_ILI, 2)) %>%
-      ungroup() %>%
-      mutate(Age_Group = factor(Age_Group, 
-                                levels = c("0-4", "5-17", "18-44", "45-64", "65+", "All")
-                                )
-             )
+      filter(Age_Group %in% input$agepick) #%>%
+      # group_by(Age_Group) %>%
+      # complete(Week_Start) %>%
+      # mutate(ED_ILI = round(ED_ILI, 2)) %>%
+      # ungroup() %>%
+      # mutate(Age_Group = factor(Age_Group,
+      #                           levels = c("0-4", "5-17", "18-44", "45-64", "65+", "All")
+      #                           )
+      #        )
+
   })
   
   
@@ -113,12 +115,12 @@ server <- function(input, output) {
     
     
     #Set min and max axis values
-    minx = min(userdataage()$Week_Start)
-    maxx = max(userdataage()$Week_Start)
+    #minx = min(userdataage()$Week_Start)
+    #maxx = max(userdataage()$Week_Start)
     miny = 0
     maxy = ceiling(max(userdataage()$ED_ILI, na.rm = T))
     
-    #Legend Titile
+    #Legend Title
     legendtitle = list(yref='paper',xref="paper",y=1.05,x=1.11, text="<b>Age Group</b>",showarrow=F)
     
     #plot
@@ -128,7 +130,8 @@ server <- function(input, output) {
                    line = list(width = 3),
                    type = "scatter", mode = "lines") %>%
       layout(hovermode = "compare",
-             xaxis = list(title = "Week", showgrid = F, range = c(minx, maxx), showline = T),
+             xaxis = list(title = "Week", showgrid = F, showline = T, range = list(-0.5, 37.5)),
+             #xaxis = list(title = "Week", showgrid = F, range = c(minx, maxx), showline = T),
              yaxis = list(title = "% of Visits for ILI", showgrid = F, range = c(miny, maxy), showline = T),
              title = "Proportion of ED Visits for ILI by Age Group, Suburban Cook County",
              annotations=legendtitle,
@@ -278,8 +281,8 @@ server <- function(input, output) {
             "A (Unknown Subtype)" = "#2ca02c", "B" = "#d62728")
     
     #set min and max axis values
-    minx = min(userdatalabbar()$Week_Start)
-    maxx = max(userdatalabbar()$Week_Start)
+    #minx = min(userdatalabbar()$Week_Start)  #plotly removing NA values by default
+    #maxx = max(userdatalabbar()$Week_Start)
     miny = 0
     maxy = userdatalabbar() %>%
       group_by(Week_Start) %>%
@@ -289,7 +292,7 @@ server <- function(input, output) {
       add(1) %>%
       max(., 5)
     
-    #Legend Titile
+    #Legend Title
     legendtitle = list(yref='paper',xref="paper",y=1.05,x=1.097, text="<b>Strain</b>",showarrow=F)
     
     #plot
@@ -298,7 +301,8 @@ server <- function(input, output) {
       layout(barmode = input$labbartype,
              hovermode = "compare",
              annotations = legendtitle,
-             xaxis = list(title = "Week", showgrid = F, showline = T, range = c(minx, maxx)),
+             xaxis = list(title = "Week", showgrid = F, showline = T, range = list(-0.5, 37.5)),
+             #xaxis = list(title = "Week", showgrid = F, showline = T, range = c(minx, maxx)),
              yaxis = list(title = "Count", showgrid = F, showline = T, range = c(miny, maxy)),
              title = "Number of Laboratory Specimens Positive for Influenza by Strain",
              margin = list(t = 50),
@@ -335,8 +339,8 @@ server <- function(input, output) {
     pal = seasons_color_pal()
 
     #Set axis mins and maxs
-    minx = min(userdatalabline()$Week_Start)
-    maxx = max(userdatalabline()$Week_Start)
+    #minx = min(userdatalabline()$Week_Start)
+    #maxx = max(userdatalabline()$Week_Start)
     miny = 0
     maxy = ceiling(max(userdatalabline()$Percent_Pos, na.rm = T)) + 2
     
@@ -349,7 +353,8 @@ server <- function(input, output) {
                    line = list(width = 3),
                    type = "scatter", mode = "lines") %>%
       layout(hovermode = "compare",
-             xaxis = list(title = "Week", showgrid = F, range = c(minx, maxx), showline = T),
+             xaxis = list(title = "Week", showgrid = F, range = list(-0.5, 37.5), showline = T),
+             #xaxis = list(title = "Week", showgrid = F, range = c(minx, maxx), showline = T),
              yaxis = list(title = "% of Positive Specimens", showgrid = F, range = c(miny, maxy), showline = T),
              title = "Percent of Lab Specimens Positive for Influenza",
              annotations=legendtitle,

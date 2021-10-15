@@ -1,0 +1,13 @@
+name: weekly_influenza_surveillance_beta
+title: weekly_influenza_surveillance_beta
+username:
+account: ccdphcd
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 204294
+bundleId: 2119065
+url: https://ccdphcd.shinyapps.io/weekly_influenza_surveillance_beta/
+when: 1559247081.02105
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: 11213_lores.jpg|CCDPH_logo-full.jpg|README.md|Thumbs.db

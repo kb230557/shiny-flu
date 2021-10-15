@@ -93,11 +93,9 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                
                column(7, offset = 0, br(),
                       h4(strong("Cook County Department of Public Health Weekly Influenza Surveillance"), style = "padding-bottom: 10px; padding-top: 5px"), 
-                      # p(id="risk", "As of ",strong(paste("Week", week))," the risk of influenza in Suburban Cook
-                      #       County is ", strong(paste0(toupper(risk_level), "."))),   
-                     # p(id="risk", "Surveillance for the 2019-2020 influenza season has been suspended due to the demands of the COVID-19 response. We
-                     #   apologize for the inconvenience and appreciate your understanding. A selection of our ILI metrics are being monitored weekly and can be viewed ",
-                     #   a(href = "https://ccdphcd.shinyapps.io/covid19/", "here.", target = "_blank")),
+                      p(id="risk", "As of ",strong(paste("Week", week))," the risk of influenza in Suburban Cook
+                            County is ", strong(paste0(toupper(risk_level), "."))),
+                     #p(id="risk", "Weekly surveillance updates for the 2020-2021 influenza season have concluded. Updates for the 2021-2022 flu season will begin in October."),
                      p("The Cook County Department of Public Health collects and analyzes data on local influenza activity year-round. During periods when higher
                         influenza activity is expected (generally October to May), this information is compiled into a weekly surveillance
                        report that is distributed to our partners in the healthcare community, schools, community groups, and the public. This application
