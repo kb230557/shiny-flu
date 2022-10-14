@@ -93,9 +93,9 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                
                column(7, offset = 0, br(),
                       h4(strong("Cook County Department of Public Health Weekly Influenza Surveillance"), style = "padding-bottom: 10px; padding-top: 5px"), 
-                      p(id="risk", "As of ",strong(paste("Week", week))," the risk of influenza in Suburban Cook
-                            County is ", strong(paste0(toupper(risk_level), "."))),
-                     #p(id="risk", "Weekly surveillance updates for the 2020-2021 influenza season have concluded. Updates for the 2021-2022 flu season will begin in October."),
+                      # p(id="risk", "As of ",strong(paste("Week", week))," the risk of influenza in Suburban Cook
+                      #       County is ", strong(paste0(toupper(risk_level), "."))),
+                     p(id="risk", "Weekly surveillance updates for the 2021-2022 influenza season have concluded. Updates for the 2022-2023 flu season will begin in October."),
                      p("The Cook County Department of Public Health collects and analyzes data on local influenza activity year-round. During periods when higher
                         influenza activity is expected (generally October to May), this information is compiled into a weekly surveillance
                        report that is distributed to our partners in the healthcare community, schools, community groups, and the public. This application
@@ -104,8 +104,8 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                      p("Influenza surveillance data are collected from multiple sources including emergency department (ED) visits, visits to outpatient
                        sentinel healthcare providers, laboratory tests, intensive-care unit (ICU) hospitalizations, and deaths. The goal of influenza
                        surveillance is to determine when and where influenza activity is occuring, what influenza viruses are circulating, and how severe the season is (as measured by hospitalizations and deaths).", align = "justify", style = "padding-bottom: 10px"),
-                     p("It is important to note that influenza surveillance may be especially challenging during the 2020-21 season. COVID-19 and influenza present with similar symptoms. This means our typical indicators for influenza-like illness (ILI) may be less accurate in reflecting influenza activity than in previous years. Data should be interpreted with caution, especially when comparing this season to other years. In addition, it's too early to tell how behavioral changes resulting from the pandemic - including both social distancing measures and changes in health-care seeking behavior - will impact the influenza season. Surveillance data for COVID-19 is also available online ",a(href = "https://ccdphcd.shinyapps.io/covid19/", "here."), align = "justify", style = "padding-bottom: 10px"),
-                     p("*Influenza surveillance data are typically aggregated by week. This app is updated on Fridays for the previous Sunday through Saturday. On all graphs, the week ending date is displayed. Ending dates are accurate for 2020 and 2021 but are approximations for all other years."),
+                     p("It is important to note that influenza surveillance may be especially challenging during the COVID-19 pandemic. COVID-19 and influenza present with similar symptoms. This means our typical indicators for influenza-like illness (ILI) may be less accurate in reflecting influenza activity than in previous years. Data should be interpreted with caution, especially when comparing this season to other years. In addition, it's too early to tell how behavioral changes resulting from the pandemic - including both social distancing measures and changes in health-care seeking behavior - will impact the influenza season. Surveillance data for COVID-19 is also available online ",a(href = "https://ccdphcd.shinyapps.io/covid19/", "here."), align = "justify", style = "padding-bottom: 10px"),
+                     p("*Influenza surveillance data are typically aggregated by week. This app is updated on Fridays for the previous Sunday through Saturday. On all graphs, the week ending date is displayed. Ending dates are accurate for the current season but are approximations for all other years."),
                      p(id = "info", "For more information on influenza, please visit the Centers for Disease Control and Prevention at ",
                        a(href = "https://www.cdc.gov/flu/", "https://www.cdc.gov/flu/. "), "Information and recommendations for healthcare professionals
                        can be found ", a(href = "https://www.cdc.gov/flu/professionals/index.htm", "here.")),
