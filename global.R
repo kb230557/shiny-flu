@@ -24,9 +24,10 @@ library("scales")
 load("flu.Rdata")
 
 
-season_name = "2021-22"
+season_name = "2022-23"
 
-year_strains =  c("2021-22" = "2021-22",
+year_strains =  c("2022-23" = "2022-23",
+                  "2021-22" = "2021-22 (H3N2 Predominant)",
                   "2020-21" = "2020-21 (Mixed Strain Predominant)",
                   "2019-20" = "2019-20 (Mixed Strain Predominant)",
                   "2018-19" = "2018-19 (H1N1 Predominant)",
