@@ -4,3 +4,5 @@ Thumbs.db
 redirectApp.R
 rsconnect/
 .Rproj.user
+.Rhistory
+*.Rproj
