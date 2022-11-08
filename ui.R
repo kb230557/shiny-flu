@@ -95,7 +95,7 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                       h4(strong("Cook County Department of Public Health Weekly Influenza Surveillance"), style = "padding-bottom: 10px; padding-top: 5px"), 
                       # p(id="risk", "As of ",strong(paste("Week", week))," the risk of influenza in Suburban Cook
                       #       County is ", strong(paste0(toupper(risk_level), "."))),
-                     p(id="risk", "Weekly surveillance updates for the 2021-2022 influenza season have concluded. Updates for the 2022-2023 flu season will begin in October."),
+                     # p(id="risk", "Weekly surveillance updates for the 2021-2022 influenza season have concluded. Updates for the 2022-2023 flu season will begin in October."),
                      p("The Cook County Department of Public Health collects and analyzes data on local influenza activity year-round. During periods when higher
                         influenza activity is expected (generally October to May), this information is compiled into a weekly surveillance
                        report that is distributed to our partners in the healthcare community, schools, community groups, and the public. This application
