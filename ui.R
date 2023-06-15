@@ -12,7 +12,7 @@ ui <- fluidPage(theme = shinytheme("flatly"),
   tags$head(tags$script(HTML(" window.dataLayer = window.dataLayer || [];
                               function gtag(){dataLayer.push(arguments);}
                               gtag('js', new Date());
-                              gtag('config', 'UA-107917571-1')"))),
+                              gtag('config', '382171232')"))),
   
   useShinydashboard(),
   tags$head(tags$style(HTML(".small-box {height: 120px}"))),
